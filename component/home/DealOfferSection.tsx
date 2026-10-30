@@ -7,16 +7,16 @@ import { getDealsApi } from '@/lib/api/dealApi';
 import type { Deal } from '@/lib/api/types';
 
 const FALLBACK_DEAL: Deal = {
-    _id: 'fallback-rakhi',
-    title: 'Raksha Bandhan Gift Hamper',
-    subtitle: 'Celebrate the bond of love with a healthy gift!',
+    _id: 'fallback-diwali',
+    title: 'Diwali Gift Hamper',
+    subtitle: 'Celebrate the festival of lights with a healthy gift!',
     description:
-        'To health and happiness, Vrateez brings you endless siblings love wrapped in delicious treats. Each hamper includes energy bars, cookies, millet bites, Rakhi & Roli Chawal.',
+        'To health and happiness, Vrateez brings you the warmth of Diwali wrapped in delicious treats. Each hamper includes energy bars, cookies, millet bites, decorative diyas & a festive greeting card.',
     badge: 'LIMITED TIME OFFER',
     cta: 'Order Now - Full Details',
-    ctaLink: '/raksha-bandhan',
-    image: '/rakhsbandhangift.png',
-    video: '/rakhevideo.mp4',
+    ctaLink: '/diwali',
+    image: '/diwaligift.png',
+    video: '/diwalivideo.mp4',
     price: 379,
     originalPrice: 499,
     items: [
@@ -24,10 +24,10 @@ const FALLBACK_DEAL: Deal = {
         'Coconut Cookies',
         'Dry Fruit Cookies',
         'Millet Bites',
-        'Rakhi',
-        'Roli & Chawal',
+        'Decorative Diyas',
+        'Festive Greeting Card',
     ],
-    productSlug: 'raksha-bandhan-gift-hamper',
+    productSlug: 'diwali-gift-hamper',
     placement: 'homepage',
     bgFrom: '#FFF5E6',
     bgTo: '#FFE8CC',
@@ -165,7 +165,7 @@ function DealCard({ deal }: { deal: Deal }) {
                                 />
                             </Link>
                             <Link
-                                href="/raksha-bandhan"
+                                href="/diwali"
                                 className="text-parchment/45 hover:text-parchment text-sm font-medium transition underline decoration-parchment/20 underline-offset-4"
                             >
                                 View full details

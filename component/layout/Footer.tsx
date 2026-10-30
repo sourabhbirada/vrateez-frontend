@@ -150,7 +150,7 @@ export default function Footer() {
                   { href: '/bulk-order', label: 'Bulk Orders' },
                   { href: '/faq', label: 'FAQ' },
                   { href: '/contact', label: 'Contact' },
-                  { href: '/raksha-bandhan', label: 'Festive Offers' },
+                  { href: '/diwali', label: 'Diwali Offers' },
                 ].map((item) => (
                   <Link
                     key={item.href}

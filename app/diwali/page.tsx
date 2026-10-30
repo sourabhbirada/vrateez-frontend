@@ -11,16 +11,16 @@ import { getProductBySlugApi } from '@/lib/api/productApi';
 import type { Deal, Product } from '@/lib/api/types';
 
 const FALLBACK_LANDING_DEAL: Deal = {
-  _id: 'fallback-rakhi-landing',
-  title: 'Raksha Bandhan Gift Hamper',
-  subtitle: 'Celebrate the bond of love with a healthy gift!',
+  _id: 'fallback-diwali-landing',
+  title: 'Diwali Gift Hamper',
+  subtitle: 'Celebrate the festival of lights with a healthy gift!',
   description:
-    'To health and happiness, Vrateez brings you endless siblings love wrapped in delicious treats. Each hamper includes energy bars, cookies, millet bites, Rakhi & Roli Chawal.',
+    'To health and happiness, Vrateez brings you the warmth of Diwali wrapped in delicious treats. Each hamper includes energy bars, cookies, millet bites, decorative diyas & a festive greeting card.',
   badge: 'LIMITED TIME OFFER',
   cta: 'Order Now',
-  ctaLink: '/product/raksha-bandhan-gift-hamper',
-  image: '/rakhsbandhangift.png',
-  video: '/rakhevideo.mp4',
+  ctaLink: '/product/diwali-gift-hamper',
+  image: '/diwaligift.png',
+  video: '/diwalivideo.mp4',
   price: 379,
   originalPrice: 499,
   items: [
@@ -28,10 +28,10 @@ const FALLBACK_LANDING_DEAL: Deal = {
     'Coconut Cookies',
     'Dry Fruit Cookies',
     'Millet Bites',
-    'Rakhi',
-    'Roli & Chawal',
+    'Decorative Diyas',
+    'Festive Greeting Card',
   ],
-  productSlug: 'raksha-bandhan-gift-hamper',
+  productSlug: 'diwali-gift-hamper',
   placement: 'landing',
   bgFrom: '#FFF5E6',
   bgTo: '#FFE8CC',
@@ -39,7 +39,7 @@ const FALLBACK_LANDING_DEAL: Deal = {
   position: 1,
 };
 
-export default function RakshaBandhanPage() {
+export default function DiwaliPage() {
   const [quantity, setQuantity] = useState(1);
   const [deal, setDeal] = useState<Deal | null>(null);
   const [product, setProduct] = useState<Product | null>(null);

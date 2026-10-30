@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      { source: "/raksha-bandhan", destination: "/diwali", permanent: true },
+      { source: "/product/raksha-bandhan-gift-hamper", destination: "/product/diwali-gift-hamper", permanent: true },
+    ];
+  },
   async rewrites() {
     // Use environment variable for backend URL
     // Production (Render): https://vrateez-backend-v1.onrender.com
