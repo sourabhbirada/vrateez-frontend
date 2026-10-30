@@ -114,7 +114,7 @@ function SectionCard({
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, totalPrice, clearCart, openCart } = useCart();
+  const { items, totalPrice, clearCart, openCart, hydrated } = useCart();
   const { user } = useAuth();
   const { settings } = useSettings();
   const orderPlacedRef = useRef(false);
@@ -161,10 +161,10 @@ export default function CheckoutPage() {
 
   // --- effects --------------------------------------------------------------
   useEffect(() => {
-    if (items.length === 0 && !orderPlacedRef.current) {
+    if (hydrated && items.length === 0 && !orderPlacedRef.current) {
       router.replace('/shop');
     }
-  }, [items.length, router]);
+  }, [hydrated, items.length, router]);
 
   useEffect(() => {
     if (user?.phone) setContactPhone(user.phone);
@@ -401,6 +401,14 @@ export default function CheckoutPage() {
       setIsLoading(false);
     }
   };
+
+  if (!hydrated) {
+    return (
+      <main className="min-h-screen bg-parchment flex items-center justify-center">
+        <span className="h-8 w-8 rounded-full border-2 border-turmeric/30 border-t-turmeric animate-spin" />
+      </main>
+    );
+  }
 
   if (items.length === 0) {
     return (

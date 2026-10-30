@@ -20,6 +20,8 @@ export interface CartItem {
 
 interface CartContextType {
     items: CartItem[];
+    /** True once the cart has been loaded from storage or the API. */
+    hydrated: boolean;
     isOpen: boolean;
     openCart: () => void;
     closeCart: () => void;
@@ -84,6 +86,7 @@ const validateLocalCart = (rawItems: unknown): CartItem[] => {
 
 export function CartProvider({ children }: { children: ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
+    const [hydrated, setHydrated] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
@@ -96,6 +99,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
                     setItems(mapApiCart(cart));
                 } catch {
                     setItems([]);
+                } finally {
+                    setHydrated(true);
                 }
             })();
             return;
@@ -120,15 +125,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 }
             }
         }
+        setHydrated(true);
     }, []);
 
     useEffect(() => {
+        if (!hydrated) return;
         const token = getToken();
         if (token) return;
         if (typeof window !== 'undefined') {
             localStorage.setItem(GUEST_CART_KEY, JSON.stringify(items));
         }
-    }, [items]);
+    }, [items, hydrated]);
 
     const openCart = useCallback(() => setIsOpen(true), []);
     const closeCart = useCallback(() => setIsOpen(false), []);
@@ -253,6 +260,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         <CartContext.Provider
             value={{
                 items,
+                hydrated,
                 isOpen,
                 openCart,
                 closeCart,
