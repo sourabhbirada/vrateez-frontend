@@ -21,6 +21,22 @@ type HeroSlide = {
 
 const FALLBACK_SLIDES: HeroSlide[] = [
     {
+        image: '/diwaligift.png',
+        video: '/diwalivideo.mp4',
+        imagePosition: 'object-cover object-center',
+        tag: 'Diwali Special · Limited Time',
+        title: 'Gift hamper that\nlights up Diwali.',
+        subtitle:
+            'Energy bars, millet cookies and bites with decorative diyas and a greeting card — healthy gifting at a festive price.',
+        cta: 'Order the hamper',
+        href: '/diwali',
+        macros: [
+            { value: '₹379', label: 'Special Price' },
+            { value: '₹120', label: 'You Save' },
+            { value: '6', label: 'Items' },
+        ],
+    },
+    {
         image: '/virteez/All three infused cookies.jpeg',
         imagePosition: 'object-[70%_38%]',
         tag: 'High Protein · Vrat Friendly',
@@ -33,6 +49,36 @@ const FALLBACK_SLIDES: HeroSlide[] = [
             { value: '10g', label: 'Protein' },
             { value: '0g', label: 'Added Sugar' },
             { value: '140', label: 'Calories' },
+        ],
+    },
+    {
+        image: '/virteez/Energy bar with packaging.jpeg',
+        imagePosition: 'object-cover object-center',
+        tag: 'Energy on the Go',
+        title: 'Fuel for\nthe long fast.',
+        subtitle:
+            'Nut and seed energy bars with slow-release carbs — steady energy through vrat, workouts and travel. No crash.',
+        cta: 'Shop energy bars',
+        href: '/shop?category=energy-on-the-go',
+        macros: [
+            { value: '8g', label: 'Protein' },
+            { value: '0g', label: 'Added Sugar' },
+            { value: '100%', label: 'Natural' },
+        ],
+    },
+    {
+        image: '/virteez/Assorted cookie box.jpeg',
+        imagePosition: 'object-cover object-center',
+        tag: 'Corporate & Festive Gifting',
+        title: 'Gifts that nourish,\nnot just please.',
+        subtitle:
+            'Custom hampers for teams, clients and family — vrat-friendly, zero added sugar, beautifully packed, delivered pan-India.',
+        cta: 'Plan a bulk order',
+        href: '/bulk-order',
+        macros: [
+            { value: 'Custom', label: 'Packaging' },
+            { value: 'Pan-India', label: 'Delivery' },
+            { value: '30-day', label: 'Terms' },
         ],
     },
 ];

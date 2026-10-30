@@ -1,17 +1,15 @@
 'use client';
 
 import type { Metadata } from 'next';
-import Image from 'next/image';
-import Link from 'next/link';
+import ProductCard from '@/component/product/ProductCard';
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { ShoppingCart, Star } from 'lucide-react';
+
 import { useCart } from '@/context/CartContext';
 import { getProductsApi } from '@/lib/api/productApi';
 import { getCategoriesApi } from '@/lib/api/categoryApi';
 import type { Product as ApiProduct, ProductCategory } from '@/lib/api/types';
 import { normalizeProductCategory } from '@/lib/api/types';
-import { resolveImage } from '@/lib/images';
 
 // Note: This is a client component, so metadata needs to be set via generateMetadata in a server component wrapper
 // For now, we'll handle SEO through document title manipulation
@@ -138,65 +136,9 @@ function ShopContent() {
                 )}
 
                 {/* Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {filtered.map(product => (
-                        <div
-                            key={product.id}
-                            className="group bg-white/60 border border-ink/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300"
-                        >
-                            <Link href={`/product/${product.slug}`}>
-                                <div className="relative aspect-square bg-ink/5 overflow-hidden">
-                                    <Image
-                                        src={resolveImage(product.image)}
-                                        alt={product.name}
-                                        fill
-                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                    <span className="absolute top-3 left-3 bg-basil text-parchment text-xs font-bold px-3 py-1 rounded-full">
-                                        {product.discount}
-                                    </span>
-                                </div>
-                            </Link>
-
-                            <div className="p-5">
-                                <Link href={`/product/${product.slug}`}>
-                                    <h3 className="text-sm font-bold text-ink uppercase mb-1 line-clamp-2 hover:text-turmeric transition">
-                                        {product.name}
-                                    </h3>
-                                </Link>
-                                <p className="text-xs text-ink/40 mb-2">{product.weight}</p>
-
-                                <div className="flex items-center gap-1.5 mb-3">
-                                    <div className="flex">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star
-                                                key={i}
-                                                size={13}
-                                                className={
-                                                    i < Math.floor(product.rating)
-                                                        ? 'fill-millet text-millet'
-                                                        : 'text-ink/15'
-                                                }
-                                            />
-                                        ))}
-                                    </div>
-                                    <span className="text-xs text-ink/40">({product.reviews})</span>
-                                </div>
-
-                                <div className="flex items-center gap-2 mb-4">
-                                    <span className="text-xl font-bold text-ink">₹{product.price}</span>
-                                    <span className="text-sm text-ink/30 line-through">₹{product.originalPrice}</span>
-                                </div>
-
-                                <button
-                                    onClick={() => handleAddToCart(product)}
-                                    className="w-full flex items-center justify-center gap-2 bg-ink text-parchment py-3 rounded-full font-semibold text-sm hover:bg-turmeric transition-colors cursor-pointer"
-                                >
-                                    <ShoppingCart size={16} />
-                                    Add to cart
-                                </button>
-                            </div>
-                        </div>
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                    {filtered.map((product, i) => (
+                        <ProductCard key={product.id} product={product} onAdd={handleAddToCart} priority={i < 4} />
                     ))}
                 </div>
 

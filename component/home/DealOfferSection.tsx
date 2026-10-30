@@ -1,10 +1,12 @@
 'use client';
 
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check, Gift, Package, ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useCart } from '@/context/CartContext';
 import { getDealsApi } from '@/lib/api/dealApi';
-import type { Deal } from '@/lib/api/types';
+import { getProductBySlugApi } from '@/lib/api/productApi';
+import type { Deal, Product } from '@/lib/api/types';
 import { resolveImage } from '@/lib/images';
 
 const FALLBACK_DEAL: Deal = {
@@ -14,7 +16,7 @@ const FALLBACK_DEAL: Deal = {
     description:
         'To health and happiness, Vrateez brings you the warmth of Diwali wrapped in delicious treats. Each hamper includes energy bars, cookies, millet bites, decorative diyas & a festive greeting card.',
     badge: 'LIMITED TIME OFFER',
-    cta: 'Order Now - Full Details',
+    cta: 'Order Now',
     ctaLink: '/diwali',
     image: '/diwaligift.png',
     video: '/diwalivideo.mp4',
@@ -36,32 +38,97 @@ const FALLBACK_DEAL: Deal = {
     position: 1,
 };
 
+const TRUST = [
+    { icon: Package, label: 'Premium gift box' },
+    { icon: Truck, label: 'Pan-India delivery' },
+    { icon: ShieldCheck, label: 'Clean label · FSSAI' },
+];
+
+const MARQUEE = ['Diwali Special', 'Save ₹120', 'Free delivery above ₹499', 'Limited stock', 'Vrat friendly', 'Zero added sugar'];
+
+function MarqueeStrip() {
+    const items = [...MARQUEE, ...MARQUEE];
+    return (
+        <div className="relative overflow-hidden bg-millet text-ink border-y border-ink/10">
+            <div className="flex w-max animate-marquee whitespace-nowrap py-2.5">
+                {items.map((t, i) => (
+                    <span key={`${t}-${i}`} className="inline-flex items-center gap-4 px-5 font-label text-[11px] tracking-[0.22em] uppercase">
+                        <Sparkles size={11} className="shrink-0" />
+                        {t}
+                    </span>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 function DealCard({ deal }: { deal: Deal }) {
-    const href =
-        deal.productSlug?.trim()
-            ? `/product/${deal.productSlug.trim()}`
-            : deal.ctaLink || '/shop';
-    const savings =
-        deal.originalPrice > deal.price && deal.price > 0
-            ? deal.originalPrice - deal.price
-            : 0;
+    const { addToCart, toggleCart } = useCart();
+    const [product, setProduct] = useState<Product | null>(null);
+    const [adding, setAdding] = useState(false);
+
+    useEffect(() => {
+        let cancelled = false;
+        const slug = deal.productSlug?.trim();
+        if (!slug) return;
+        getProductBySlugApi(slug)
+            .then((p) => {
+                if (!cancelled) setProduct(p);
+            })
+            .catch(() => {
+                if (!cancelled) setProduct(null);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [deal.productSlug]);
+
+    const detailsHref = deal.ctaLink && deal.ctaLink.startsWith('/') && !deal.ctaLink.startsWith('/product/') ? deal.ctaLink : '/diwali';
+    const productHref = deal.productSlug?.trim() ? `/product/${deal.productSlug.trim()}` : detailsHref;
+    const price = product?.price ?? deal.price;
+    const originalPrice = product?.originalPrice ?? deal.originalPrice;
+    const savings = originalPrice > price && price > 0 ? originalPrice - price : 0;
+    const pct = savings ? Math.round((savings / originalPrice) * 100) : 0;
+
+    const handleAdd = () => {
+        if (!product) return;
+        setAdding(true);
+        addToCart({
+            id: product._id,
+            slug: product.slug,
+            name: product.name,
+            image: product.image,
+            price: product.price,
+            originalPrice: product.originalPrice,
+            weight: product.weight,
+            freeDelivery: product.freeDelivery,
+        });
+        toggleCart();
+        window.setTimeout(() => setAdding(false), 1200);
+    };
 
     return (
         <section className="relative overflow-hidden bg-ink text-parchment">
+            <MarqueeStrip />
+
             <div
-                className="pointer-events-none absolute inset-0 opacity-[0.07]"
+                className="pointer-events-none absolute inset-0 opacity-[0.10]"
                 aria-hidden="true"
                 style={{
                     backgroundImage:
-                        'radial-gradient(circle at 20% 20%, #E4A93D 0%, transparent 45%), radial-gradient(circle at 85% 70%, #C4711F 0%, transparent 40%)',
+                        'radial-gradient(ellipse at 18% 25%, #E4A93D 0%, transparent 42%), radial-gradient(ellipse at 88% 75%, #C4711F 0%, transparent 38%)',
                 }}
             />
-            <div className="pointer-events-none absolute inset-0 grain-overlay opacity-[0.04] mix-blend-overlay" aria-hidden="true" />
+            <div className="pointer-events-none absolute inset-0 grain-overlay opacity-[0.05] mix-blend-overlay" aria-hidden="true" />
 
-            <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-14 md:py-20">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
-                    <div className="relative order-1">
-                        <div className="relative aspect-[4/3] md:aspect-[16/10] overflow-hidden rounded-sm ring-1 ring-parchment/15 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.65)]">
+            <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24">
+                <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-16 items-center">
+                    {/* Media */}
+                    <div className="relative">
+                        <div className="absolute -inset-3 md:-inset-4 rounded-[28px] border border-millet/20" aria-hidden="true" />
+                        <div className="absolute -inset-6 md:-inset-8 rounded-[36px] border border-millet/10" aria-hidden="true" />
+
+                        <div className="relative aspect-[4/3] overflow-hidden rounded-[22px] ring-1 ring-parchment/15 shadow-[0_40px_90px_-30px_rgba(0,0,0,0.8)]">
                             {deal.video ? (
                                 <video
                                     autoPlay
@@ -75,58 +142,77 @@ function DealCard({ deal }: { deal: Deal }) {
                                 </video>
                             ) : deal.image ? (
                                 // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                    src={resolveImage(deal.image)}
-                                    alt={deal.title}
-                                    className="absolute inset-0 h-full w-full object-cover"
-                                />
+                                <img src={resolveImage(deal.image)} alt={deal.title} className="absolute inset-0 h-full w-full object-cover" />
                             ) : (
                                 <div className="absolute inset-0 bg-basil" />
                             )}
-                            <div className="absolute inset-0 bg-linear-to-t from-ink/50 via-transparent to-ink/10" />
-                        </div>
-                    </div>
+                            <div className="absolute inset-0 bg-linear-to-t from-ink/60 via-transparent to-transparent" />
 
-                    <div className="order-2 space-y-7">
-                        {deal.badge ? (
-                            <span className="inline-flex items-center gap-2 font-label text-[10px] tracking-[0.22em] uppercase text-millet border border-millet/35 px-3 py-1.5">
-                                <span className="relative flex h-1.5 w-1.5">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-millet opacity-60" />
-                                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-millet" />
+                            {deal.badge ? (
+                                <span className="absolute top-4 left-4 inline-flex items-center gap-2 bg-ink/70 backdrop-blur-md text-millet font-label text-[10px] tracking-[0.22em] uppercase px-3 py-1.5 rounded-full ring-1 ring-millet/30">
+                                    <span className="relative flex h-1.5 w-1.5">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-millet opacity-70" />
+                                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-millet" />
+                                    </span>
+                                    {deal.badge}
                                 </span>
-                                {deal.badge}
-                            </span>
-                        ) : null}
+                            ) : null}
 
-                        <div>
-                            <h2 className="font-display italic text-3xl md:text-5xl text-parchment leading-[1.1] tracking-[-0.01em] whitespace-pre-line">
-                                {deal.title}
-                            </h2>
-                            {deal.subtitle ? (
-                                <p className="mt-3 text-[15px] md:text-base text-parchment/65 leading-relaxed max-w-md">
-                                    {deal.subtitle}
-                                </p>
+                            {deal.items?.length ? (
+                                <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-1.5">
+                                    {deal.items.slice(0, 4).map((item) => (
+                                        <span key={item} className="bg-parchment/15 backdrop-blur-md text-parchment text-[11px] font-medium px-2.5 py-1 rounded-full ring-1 ring-parchment/20">
+                                            {item}
+                                        </span>
+                                    ))}
+                                    {deal.items.length > 4 ? (
+                                        <span className="bg-parchment/15 backdrop-blur-md text-parchment/80 text-[11px] px-2.5 py-1 rounded-full ring-1 ring-parchment/20">
+                                            +{deal.items.length - 4} more
+                                        </span>
+                                    ) : null}
+                                </div>
                             ) : null}
                         </div>
 
-                        {deal.description ? (
-                            <p className="text-sm md:text-[15px] text-parchment/55 leading-relaxed max-w-lg">
-                                {deal.description}
-                            </p>
+                        {price > 0 ? (
+                            <div className="absolute -bottom-6 -right-2 md:-right-6 bg-parchment text-ink rounded-2xl px-5 py-4 shadow-2xl ring-1 ring-ink/10 animate-glow">
+                                <div className="flex items-baseline gap-2">
+                                    <span className="font-display text-3xl md:text-4xl leading-none">₹{price}</span>
+                                    {originalPrice > price ? <span className="text-sm text-ink/40 line-through">₹{originalPrice}</span> : null}
+                                </div>
+                                {savings > 0 ? (
+                                    <p className="mt-1 font-label text-[10px] tracking-[0.18em] uppercase text-clay">
+                                        Save ₹{savings} · {pct}% off
+                                    </p>
+                                ) : null}
+                            </div>
                         ) : null}
+                    </div>
 
-                        {deal.items?.length > 0 ? (
+                    {/* Copy */}
+                    <div className="space-y-8 lg:pl-4">
+                        <div>
+                            <p className="font-label text-[10px] tracking-[0.24em] uppercase text-millet/80 mb-4 flex items-center gap-2">
+                                <Gift size={13} />
+                                Festive gifting
+                            </p>
+                            <h2 className="font-display italic text-4xl md:text-[3.4rem] leading-[1.02] tracking-[-0.015em] whitespace-pre-line">
+                                {deal.title}
+                            </h2>
+                            {deal.subtitle ? <p className="mt-4 text-base md:text-lg text-parchment/70 leading-relaxed max-w-md">{deal.subtitle}</p> : null}
+                        </div>
+
+                        {deal.description ? <p className="text-[15px] text-parchment/55 leading-relaxed max-w-lg">{deal.description}</p> : null}
+
+                        {deal.items?.length ? (
                             <div>
-                                <p className="font-label text-[10px] tracking-[0.18em] uppercase text-millet/80 mb-3">
-                                    Includes
-                                </p>
-                                <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5">
-                                    {deal.items.map((item) => (
-                                        <li
-                                            key={item}
-                                            className="flex items-center gap-2 text-sm text-parchment/80"
-                                        >
-                                            <Check size={14} className="shrink-0 text-millet" strokeWidth={2.5} />
+                                <p className="font-label text-[10px] tracking-[0.18em] uppercase text-millet/80 mb-4">What&apos;s inside</p>
+                                <ul className="grid grid-cols-2 gap-x-6 gap-y-3">
+                                    {deal.items.map((item, i) => (
+                                        <li key={item} className="flex items-center gap-3 text-sm text-parchment/85">
+                                            <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-millet/15 text-millet font-label text-[10px] ring-1 ring-millet/30">
+                                                {String(i + 1).padStart(2, '0')}
+                                            </span>
                                             {item}
                                         </li>
                                     ))}
@@ -134,44 +220,49 @@ function DealCard({ deal }: { deal: Deal }) {
                             </div>
                         ) : null}
 
-                        {deal.price > 0 ? (
-                            <div className="flex flex-wrap items-end gap-4 pt-1 border-t border-parchment/10">
-                                <div className="flex items-baseline gap-3 pt-5">
-                                    <span className="font-display text-4xl md:text-5xl text-millet leading-none">
-                                        ₹{deal.price}
-                                    </span>
-                                    {deal.originalPrice > deal.price ? (
-                                        <span className="text-lg text-parchment/35 line-through">
-                                            ₹{deal.originalPrice}
-                                        </span>
-                                    ) : null}
-                                </div>
-                                {savings > 0 ? (
-                                    <span className="mb-1 font-label text-[10px] tracking-[0.14em] uppercase bg-basil text-parchment px-3 py-1.5 ring-1 ring-parchment/10">
-                                        Save ₹{savings}
-                                    </span>
-                                ) : null}
-                            </div>
-                        ) : null}
+                        <div className="flex flex-wrap gap-x-6 gap-y-2 border-t border-parchment/10 pt-6">
+                            {TRUST.map(({ icon: Icon, label }) => (
+                                <span key={label} className="inline-flex items-center gap-2 text-xs text-parchment/60">
+                                    <Icon size={14} className="text-millet" strokeWidth={1.75} />
+                                    {label}
+                                </span>
+                            ))}
+                        </div>
 
-                        <div className="flex flex-wrap items-center gap-4 pt-1">
+                        <div className="flex flex-wrap items-center gap-4">
+                            {product ? (
+                                <button
+                                    type="button"
+                                    onClick={handleAdd}
+                                    className="group inline-flex items-center gap-2.5 bg-turmeric text-parchment px-7 py-3.5 rounded-full font-semibold text-sm shadow-lg shadow-turmeric/25 transition-all duration-200 hover:bg-clay hover:shadow-clay/30"
+                                >
+                                    {adding ? <Check size={15} strokeWidth={2.5} /> : null}
+                                    {adding ? 'Added to cart' : 'Add hamper to cart'}
+                                    {!adding ? <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" /> : null}
+                                </button>
+                            ) : (
+                                <Link
+                                    href={productHref}
+                                    className="group inline-flex items-center gap-2.5 bg-turmeric text-parchment px-7 py-3.5 rounded-full font-semibold text-sm shadow-lg shadow-turmeric/25 transition-all duration-200 hover:bg-clay"
+                                >
+                                    {deal.cta || 'Order Now'}
+                                    <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+                                </Link>
+                            )}
                             <Link
-                                href={href}
-                                className="group inline-flex items-center gap-2.5 bg-turmeric text-parchment px-7 py-3.5 font-semibold text-sm shadow-md shadow-turmeric/20 transition-all duration-200 hover:bg-clay hover:shadow-lg hover:shadow-clay/25"
+                                href={detailsHref}
+                                className="inline-flex items-center gap-1.5 text-parchment/60 hover:text-parchment text-sm font-medium transition underline decoration-parchment/20 underline-offset-4"
                             >
-                                {deal.cta || 'Order Now'}
-                                <ArrowRight
-                                    size={15}
-                                    className="transition-transform group-hover:translate-x-0.5"
-                                />
-                            </Link>
-                            <Link
-                                href="/diwali"
-                                className="text-parchment/45 hover:text-parchment text-sm font-medium transition underline decoration-parchment/20 underline-offset-4"
-                            >
-                                View full details
+                                Full details
                             </Link>
                         </div>
+
+                        <p className="text-xs text-parchment/40">
+                            Gifting for a team or family?{' '}
+                            <Link href="/bulk-order" className="text-millet/90 hover:text-millet underline underline-offset-4">
+                                Order hampers in bulk
+                            </Link>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -187,7 +278,7 @@ export default function DealOfferSection() {
         async function load() {
             try {
                 const items = await getDealsApi('homepage');
-                if (!cancelled) setDeals(items );
+                if (!cancelled) setDeals(items.length ? items : [FALLBACK_DEAL]);
             } catch {
                 if (!cancelled) setDeals([FALLBACK_DEAL]);
             }
