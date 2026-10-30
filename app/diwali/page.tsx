@@ -21,7 +21,7 @@ const FALLBACK_LANDING_DEAL: Deal = {
   cta: 'Order Now',
   ctaLink: '/product/diwali-gift-hamper',
   image: '/diwaligift.png',
-  video: '/diwalivideo.mp4',
+  video: '',
   price: 379,
   originalPrice: 499,
   items: ['Energy Bar', 'Coconut Cookies', 'Dry Fruit Cookies', 'Millet Bites', 'Decorative Diyas', 'Festive Greeting Card'],

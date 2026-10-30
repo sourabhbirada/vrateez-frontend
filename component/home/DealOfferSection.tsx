@@ -19,7 +19,7 @@ const FALLBACK_DEAL: Deal = {
     cta: 'Order Now',
     ctaLink: '/diwali',
     image: '/diwaligift.png',
-    video: '/diwalivideo.mp4',
+    video: '',
     price: 379,
     originalPrice: 499,
     items: [

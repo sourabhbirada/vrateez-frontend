@@ -21,8 +21,7 @@ type HeroSlide = {
 
 const FALLBACK_SLIDES: HeroSlide[] = [
     {
-        image: '/diwaligift.png',
-        video: '/diwalivideo.mp4',
+        image: '/diwali-hero.jpg',
         imagePosition: 'object-cover object-center',
         tag: 'Diwali Special · Limited Time',
         title: 'Gift hamper that\nlights up Diwali.',
