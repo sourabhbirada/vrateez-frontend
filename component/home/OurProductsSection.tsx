@@ -8,6 +8,7 @@ import { BadgeCheck, Wheat, Tag, FlaskConical, Sprout, Ban } from 'lucide-react'
 import { getCategoriesApi } from '@/lib/api/categoryApi';
 import { useSettings } from '@/context/SettingsContext';
 import type { Category } from '@/lib/api/types';
+import { resolveImage } from '@/lib/images';
 
 type CategoryCardItem = {
   image: string;
@@ -18,35 +19,34 @@ type CategoryCardItem = {
 
 type FeatureItem = { icon: LucideIcon; title: string };
 
-const S3 = 'https://vrateez.s3.ap-south-1.amazonaws.com';
 
 const FALLBACK_CATEGORY_CARDS: CategoryCardItem[] = [
   {
-    image: `${S3}/Assorted+cookie+box.jpeg`,
+    image: '/virteez/Assorted cookie box.jpeg',
     label: 'Cookies',
     desc: 'Protein-rich millet cookies',
     href: '/shop?category=cookies',
   },
   {
-    image: `${S3}/Energy+bar.jpeg`,
+    image: '/virteez/Energy bar.jpeg',
     label: 'Energy on the Go',
     desc: 'Energy bars',
     href: '/shop?category=energy-on-the-go',
   },
   {
-    image: `${S3}/Blueberry+cookies.jpeg`,
+    image: '/virteez/Blueberry cookies.jpeg',
     label: 'Infused Cookies',
     desc: 'Fruit-infused cookies',
     href: '/shop?category=infused-cookie',
   },
   {
-    image: `${S3}/Cashew+cookies+in+plate+along+with+box.jpeg`,
+    image: '/virteez/Cashew cookies in plate along with box.jpeg',
     label: 'Savory Snacks',
     desc: 'Wholesome savory bites',
     href: '/shop?category=savory-snacks',
   },
   {
-    image: `${S3}/Desert+dates+drops.jpeg`,
+    image: '/virteez/Desert dates drops.jpeg',
     label: 'Wholesome Delights',
     desc: 'Everyday healthy treats',
     href: '/shop?category=wholesome-delights',
@@ -54,13 +54,13 @@ const FALLBACK_CATEGORY_CARDS: CategoryCardItem[] = [
 ];
 
 const IMAGE_BY_SLUG: Record<string, string> = {
-  cookies: `${S3}/Assorted+cookie+box.jpeg`,
-  'energy-on-the-go': `${S3}/Energy+bar.jpeg`,
-  'energy-bar': `${S3}/Energy+bar.jpeg`,
-  'infused-cookie': `${S3}/Blueberry+cookies.jpeg`,
-  'infused-cookies': `${S3}/Blueberry+cookies.jpeg`,
-  'savory-snacks': `${S3}/Cashew+cookies+in+plate+along+with+box.jpeg`,
-  'wholesome-delights': `${S3}/Desert+dates+drops.jpeg`,
+  cookies: '/virteez/Assorted cookie box.jpeg',
+  'energy-on-the-go': '/virteez/Energy bar.jpeg',
+  'energy-bar': '/virteez/Energy bar.jpeg',
+  'infused-cookie': '/virteez/Blueberry cookies.jpeg',
+  'infused-cookies': '/virteez/Blueberry cookies.jpeg',
+  'savory-snacks': '/virteez/Cashew cookies in plate along with box.jpeg',
+  'wholesome-delights': '/virteez/Desert dates drops.jpeg',
 };
 
 const DEFAULT_FEATURES: FeatureItem[] = [
@@ -234,7 +234,7 @@ function CategoryCard({ cat }: { cat: CategoryCardItem }) {
       className="group relative overflow-hidden h-64 md:h-72 ring-1 ring-parchment/15 shadow-[0_20px_50px_-28px_rgba(0,0,0,0.7)] transition-all duration-300 hover:ring-millet/40"
     >
       <Image
-        src={cat.image}
+        src={resolveImage(cat.image)}
         alt={cat.label}
         fill
         className="object-cover group-hover:scale-105 transition-transform duration-500"

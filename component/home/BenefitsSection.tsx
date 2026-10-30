@@ -2,34 +2,35 @@
 
 import Image from 'next/image';
 import { useSettings } from '@/context/SettingsContext';
+import { resolveImage } from '@/lib/images';
 
 const DEFAULT_BENEFITS = [
   {
-    image: 'https://vrateez.s3.ap-south-1.amazonaws.com/Energy+bar+closeup.jpeg',
+    image: '/virteez/Energy bar closeup.jpeg',
     title: 'Vrat Friendly',
     subtitle: 'Always',
     bgColor: '#F5E6C8',
   },
   {
-    image: 'https://vrateez.s3.ap-south-1.amazonaws.com/Cashew+cookies+in+plate+along+with+box.jpeg',
+    image: '/virteez/Cashew cookies in plate along with box.jpeg',
     title: 'No Fillers &',
     subtitle: 'No Palm Oil',
     bgColor: '#F3DFC4',
   },
   {
-    image: 'https://vrateez.s3.ap-south-1.amazonaws.com/Blueberry+cookies.jpeg',
+    image: '/virteez/Blueberry cookies.jpeg',
     title: 'Clean Label',
     subtitle: 'Ingredients',
     bgColor: '#E8D5C4',
   },
   {
-    image: 'https://vrateez.s3.ap-south-1.amazonaws.com/Energy+bar.jpeg',
+    image: '/virteez/Energy bar.jpeg',
     title: 'Gut &',
     subtitle: 'Wellness Support',
     bgColor: '#E4E8DF',
   },
   {
-    image: 'https://vrateez.s3.ap-south-1.amazonaws.com/Almond+cookies+in+plate.jpeg',
+    image: '/virteez/Almond cookies in plate.jpeg',
     title: 'Tradition Meets',
     subtitle: 'Innovation',
     bgColor: '#EDE8DF',
@@ -62,7 +63,7 @@ export default function BenefitsSection() {
                 style={{ backgroundColor: b.bgColor || '#F5E6C8' }}
               >
                 <Image
-                  src={b.image}
+                  src={resolveImage(b.image)}
                   alt={`${b.title} ${b.subtitle || ''}`}
                   width={160}
                   height={160}

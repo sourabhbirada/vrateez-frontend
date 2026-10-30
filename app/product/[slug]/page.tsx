@@ -61,6 +61,7 @@ function mapApiProductToView(p: ApiProduct): ProductView {
 }
 
 import { notFound } from 'next/navigation';
+import { resolveImage } from '@/lib/images';
 
 export default function ProductPage() {
     const params = useParams();
@@ -198,7 +199,7 @@ export default function ProductPage() {
                 <div>
                     <div className="relative aspect-square rounded-2xl overflow-hidden bg-ink/5 mb-4">
                         <Image
-                            src={product.images[selectedImage]}
+                            src={resolveImage(product.images[selectedImage])}
                             alt={product.name}
                             fill
                             className="object-cover"
@@ -215,7 +216,7 @@ export default function ProductPage() {
                                         i === selectedImage ? 'border-turmeric' : 'border-transparent hover:border-ink/20'
                                     }`}
                                 >
-                                    <Image src={img} alt="" fill className="object-cover" />
+                                    <Image src={resolveImage(img)} alt="" fill className="object-cover" />
                                 </button>
                             ))}
                         </div>
@@ -369,7 +370,7 @@ export default function ProductPage() {
                                                         {choice.image ? (
                                                             <div className="relative w-full aspect-square mb-2 rounded-lg overflow-hidden bg-ink/5">
                                                                 <Image
-                                                                    src={choice.image}
+                                                                    src={resolveImage(choice.image)}
                                                                     alt={choice.label}
                                                                     fill
                                                                     className="object-cover"
@@ -506,7 +507,7 @@ export default function ProductPage() {
                             <Link key={rp.id} href={`/product/${rp.slug}`} className="group">
                                 <div className="relative aspect-square rounded-xl overflow-hidden bg-ink/5 mb-3">
                                     <Image
-                                        src={rp.image}
+                                        src={resolveImage(rp.image)}
                                         alt={rp.name}
                                         fill
                                         className="object-cover group-hover:scale-105 transition-transform duration-300"

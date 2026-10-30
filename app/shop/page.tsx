@@ -11,6 +11,7 @@ import { getProductsApi } from '@/lib/api/productApi';
 import { getCategoriesApi } from '@/lib/api/categoryApi';
 import type { Product as ApiProduct, ProductCategory } from '@/lib/api/types';
 import { normalizeProductCategory } from '@/lib/api/types';
+import { resolveImage } from '@/lib/images';
 
 // Note: This is a client component, so metadata needs to be set via generateMetadata in a server component wrapper
 // For now, we'll handle SEO through document title manipulation
@@ -146,7 +147,7 @@ function ShopContent() {
                             <Link href={`/product/${product.slug}`}>
                                 <div className="relative aspect-square bg-ink/5 overflow-hidden">
                                     <Image
-                                        src={product.image}
+                                        src={resolveImage(product.image)}
                                         alt={product.name}
                                         fill
                                         className="object-cover group-hover:scale-105 transition-transform duration-500"

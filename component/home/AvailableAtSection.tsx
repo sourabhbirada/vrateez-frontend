@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useSettings } from '@/context/SettingsContext';
+import { resolveImage } from '@/lib/images';
 
 const DEFAULT_PARTNERS = [
   { name: 'amazon', style: 'text-2xl font-bold text-ink italic', url: '', logoUrl: '' },
@@ -34,7 +35,7 @@ export default function AvailableAtSection() {
           {partners.map((p) => {
             const content = p.logoUrl ? (
               <div className="relative h-10 w-28">
-                <Image src={p.logoUrl} alt={p.name} fill className="object-contain" />
+                <Image src={resolveImage(p.logoUrl)} alt={p.name} fill className="object-contain" />
               </div>
             ) : (
               <span className={(p as { style?: string }).style || 'text-xl font-bold text-ink'}>{p.name}</span>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getDealsApi } from '@/lib/api/dealApi';
 import type { Deal } from '@/lib/api/types';
+import { resolveImage } from '@/lib/images';
 
 const FALLBACK_DEAL: Deal = {
     _id: 'fallback-diwali',
@@ -67,7 +68,7 @@ function DealCard({ deal }: { deal: Deal }) {
                                     loop
                                     muted
                                     playsInline
-                                    poster={deal.image || undefined}
+                                    poster={resolveImage(deal.image || undefined)}
                                     className="absolute inset-0 h-full w-full object-cover"
                                 >
                                     <source src={deal.video} type="video/mp4" />
@@ -75,7 +76,7 @@ function DealCard({ deal }: { deal: Deal }) {
                             ) : deal.image ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img
-                                    src={deal.image}
+                                    src={resolveImage(deal.image)}
                                     alt={deal.title}
                                     className="absolute inset-0 h-full w-full object-cover"
                                 />

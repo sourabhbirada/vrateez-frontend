@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { X, Plus, Minus, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { resolveImage } from '@/lib/images';
 
 export default function CartSidebar() {
     const { items, isOpen, closeCart, updateQuantity, removeFromCart, totalItems, totalPrice, clearCart } = useCart();
@@ -70,7 +71,7 @@ export default function CartSidebar() {
                                     {/* Image */}
                                     <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                                         <Image
-                                            src={item.image}
+                                            src={resolveImage(item.image)}
                                             alt={item.name}
                                             fill
                                             className="object-cover"

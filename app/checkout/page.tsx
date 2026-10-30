@@ -13,6 +13,7 @@ import { validateCouponApi } from '@/lib/api/couponApi';
 import { getProductsApi } from '@/lib/api/productApi';
 import { isPaymentCancelledError, openRazorpayCheckout } from '@/lib/razorpay';
 import type { ShippingAddress, GuestInfo, Order } from '@/lib/api/types';
+import { resolveImage } from '@/lib/images';
 
 type CheckoutPaymentMode = 'online' | 'cod';
 
@@ -584,7 +585,7 @@ function CheckoutForm({
                             {items.map((item) => (
                                 <div key={item.id} className="flex gap-3">
                                     <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-ink/8 bg-parchment">
-                                        <Image src={item.image} alt={item.name} fill className="object-cover" />
+                                        <Image src={resolveImage(item.image)} alt={item.name} fill className="object-cover" />
                                         {item.freeDelivery && (
                                             <div className="absolute bottom-0 left-0 right-0 bg-basil/90 text-white text-[9px] font-bold text-center py-0.5">
                                                 FREE 🎁

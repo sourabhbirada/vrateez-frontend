@@ -9,6 +9,7 @@ import { useSettings } from '@/context/SettingsContext';
 import { getDealsApi } from '@/lib/api/dealApi';
 import { getProductBySlugApi } from '@/lib/api/productApi';
 import type { Deal, Product } from '@/lib/api/types';
+import { resolveImage } from '@/lib/images';
 
 const FALLBACK_LANDING_DEAL: Deal = {
   _id: 'fallback-diwali-landing',
@@ -123,7 +124,7 @@ export default function DiwaliPage() {
     <main className="min-h-screen bg-ink text-parchment">
       <section className="relative h-[42vh] md:h-[52vh] overflow-hidden">
         {deal.image ? (
-          <Image src={deal.image} alt={deal.title} fill className="object-cover" priority />
+          <Image src={resolveImage(deal.image)} alt={deal.title} fill className="object-cover" priority />
         ) : (
           <div className="absolute inset-0 bg-basil" />
         )}
@@ -164,13 +165,13 @@ export default function DiwaliPage() {
                   controls
                   loop
                   playsInline
-                  poster={deal.image || undefined}
+                  poster={resolveImage(deal.image || undefined)}
                   className="absolute inset-0 h-full w-full object-cover"
                 >
                   <source src={deal.video} type="video/mp4" />
                 </video>
               ) : deal.image ? (
-                <Image src={deal.image} alt={deal.title} fill className="object-cover" />
+                <Image src={resolveImage(deal.image)} alt={deal.title} fill className="object-cover" />
               ) : null}
             </div>
 

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Search, X, ArrowUpRight } from 'lucide-react';
 import { getProductsApi } from '@/lib/api/productApi';
 import type { Product } from '@/lib/api/types';
+import { resolveImage } from '@/lib/images';
 
 interface SearchModalProps {
     isOpen: boolean;
@@ -148,7 +149,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                                         {/* Image */}
                                         <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-stone-100 flex-shrink-0 border border-stone-100">
                                             <Image
-                                                src={product.image}
+                                                src={resolveImage(product.image)}
                                                 alt={product.name}
                                                 fill
                                                 className="object-cover"

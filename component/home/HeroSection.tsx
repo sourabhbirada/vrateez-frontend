@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ArrowRight, Leaf, WheatOff } from 'lucide-react';
 import { getBannersApi } from '@/lib/api/bannerApi';
 import type { Banner } from '@/lib/api/types';
+import { resolveImage } from '@/lib/images';
 
 type HeroSlide = {
     image: string;
@@ -20,7 +21,7 @@ type HeroSlide = {
 
 const FALLBACK_SLIDES: HeroSlide[] = [
     {
-        image: 'https://vrateez.s3.ap-south-1.amazonaws.com/All+three+infused+cookies.jpeg',
+        image: '/virteez/All three infused cookies.jpeg',
         imagePosition: 'object-[70%_38%]',
         tag: 'High Protein · Vrat Friendly',
         title: 'Protein that\nfits your fast.',
@@ -248,14 +249,14 @@ export default function HeroSection() {
                                 muted
                                 loop
                                 playsInline
-                                poster={slide.image || undefined}
+                                poster={resolveImage(slide.image || undefined)}
                                 className="absolute inset-0 h-full w-full object-cover"
                             >
                                 <source src={slide.video} type="video/mp4" />
                             </video>
                         ) : slide.image ? (
                             <Image
-                                src={slide.image}
+                                src={resolveImage(slide.image)}
                                 alt={slide.title}
                                 fill
                                 className={`object-cover ${slide.imagePosition}`}

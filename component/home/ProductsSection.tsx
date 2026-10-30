@@ -8,6 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { getProductsApi } from '@/lib/api/productApi';
 import { getCategoriesApi } from '@/lib/api/categoryApi';
 import type { Category, Product } from '@/lib/api/types';
+import { resolveImage } from '@/lib/images';
 
 type ProductView = {
   id: string;
@@ -141,7 +142,7 @@ export default function ProductsSection() {
               <Link href={`/product/${product.slug}`}>
                 <div className="relative aspect-square bg-ink/5 overflow-hidden">
                   <Image
-                    src={product.image}
+                    src={resolveImage(product.image)}
                     alt={product.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
