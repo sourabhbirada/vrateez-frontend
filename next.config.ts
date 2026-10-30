@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
     return [
       { source: "/raksha-bandhan", destination: "/diwali", permanent: true },
       { source: "/product/raksha-bandhan-gift-hamper", destination: "/product/diwali-gift-hamper", permanent: true },
+      { source: "/order-tracking", destination: "/track-order", permanent: false },
     ];
   },
   async rewrites() {

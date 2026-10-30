@@ -1,537 +1,400 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Search, Package, MapPin, Clock, Truck, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { AlertCircle, ArrowRight, Hash, Loader2, Mail, MapPin, Package, Search, Truck } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
+import {
+  getGuestOrderApi,
+  getOrderByIdApi,
+  getOrderByOrderIdApi,
+  getOrderByTrackingNumberApi,
+  getOrderTrackingApi,
+} from '@/lib/api/orderApi';
+import type { LiveTracking, Order } from '@/lib/api/types';
+import { resolveImage } from '@/lib/images';
+import { displayOrderId, formatDateTime, formatInr, isObjectId, paymentMethodLabel, recallLastOrder } from '@/lib/orderUtils';
+import TrackingTimeline from '@/component/order/TrackingTimeline';
 
-import { API_BASE_URL } from '@/lib/api/config';
+type Mode = 'orderId' | 'trackingNumber';
 
-type TrackingEvent = {
-  message: string;
-  status: string;
-  statusLabel: string;
-  datetime: string;
-  source: string;
-  location: {
-    city: string;
-    state: string;
-    country: string;
-    zip: string;
-  };
+const inputCls =
+  'w-full rounded-xl border border-ink/12 bg-white px-4 py-3.5 text-sm text-ink placeholder:text-ink/30 outline-none transition focus:border-turmeric focus:ring-2 focus:ring-turmeric/30 disabled:bg-ink/[0.04] disabled:text-ink/50';
+
+const STATUS_PILL: Record<Order['orderStatus'], string> = {
+  placed: 'bg-ink/5 text-ink/70',
+  processing: 'bg-turmeric/10 text-clay',
+  shipped: 'bg-millet/20 text-clay',
+  delivered: 'bg-basil/10 text-basil',
+  cancelled: 'bg-clay/10 text-clay',
 };
 
-type TrackingData = {
-  trackingNumber: string;
-  trackingProvider: string;
-  orderId: string;
-  status: string;
-  statusLabel: string;
-  estimatedDelivery: string | null;
-  lastEventTime: string;
-  destinationCity: string | null;
-  destinationState: string | null;
-  events: TrackingEvent[];
-};
+function TrackOrderContent() {
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+  const { settings } = useSettings();
 
-type Order = {
-  _id: string;
-  orderId?: string;
-  trackingNumber?: string;
-  courierPartner?: string;
-  items: Array<{ name: string; quantity: number; price: number }>;
-  shippingAddress: {
-    line1: string;
-    line2?: string;
-    city: string;
-    state: string;
-    pincode: string;
-  };
-  paymentMethod: string;
-  paymentStatus: string;
-  orderStatus: string;
-  subtotal: number;
-  shippingCharge: number;
-  discountAmount: number;
-  totalAmount: number;
-  createdAt: string;
-};
-
-function formatDate(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
-const statusColors: Record<string, string> = {
-  placed: 'bg-blue-100 text-blue-700',
-  processing: 'bg-yellow-100 text-yellow-700',
-  shipped: 'bg-purple-100 text-purple-700',
-  delivered: 'bg-green-100 text-green-700',
-  cancelled: 'bg-red-100 text-red-700',
-};
-
-const trackingStatusColors: Record<string, string> = {
-  pre_transit: 'bg-blue-100 text-blue-700',
-  in_transit: 'bg-purple-100 text-purple-700',
-  out_for_delivery: 'bg-orange-100 text-orange-700',
-  delivered: 'bg-green-100 text-green-700',
-  failure: 'bg-red-100 text-red-700',
-};
-
-export default function TrackOrderPage() {
-  const [searchType, setSearchType] = useState<'orderId' | 'trackingNumber'>('orderId');
-  const [searchValue, setSearchValue] = useState('');
+  const [mode, setMode] = useState<Mode>('orderId');
+  const [value, setValue] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [order, setOrder] = useState<Order | null>(null);
-  const [tracking, setTracking] = useState<TrackingData | null>(null);
+  const [tracking, setTracking] = useState<LiveTracking | null>(null);
+  const [trackingLoading, setTrackingLoading] = useState(false);
+  const [trackingError, setTrackingError] = useState<string | null>(null);
+  const autoRan = useRef(false);
 
-  // Set document title for SEO
   useEffect(() => {
-    document.title = 'Track Your Order | Vrateez - Real-time Order Tracking';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Track your Vrateez order in real-time. Enter your Order ID or Tracking Number to see live delivery status of your healthy vrat snacks and protein cookies.');
-    }
-  }, []);
+    if (user?.email) setEmail(user.email);
+  }, [user?.email]);
 
-  // Prefill from WhatsApp / email deep links (?trackingNumber=... or ?orderId=...)
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    const tn = params.get('trackingNumber') || params.get('tracking');
-    const oid = params.get('orderId');
-    if (tn) {
-      setSearchType('trackingNumber');
-      setSearchValue(tn);
-    } else if (oid) {
-      setSearchType('orderId');
-      setSearchValue(oid);
-    }
-  }, []);
+  const lookup = useCallback(
+    async (lookupMode: Mode, lookupValue: string, lookupEmail: string) => {
+      const q = lookupValue.trim().replace(/^#/, '');
+      const em = lookupEmail.trim();
+      setError(null);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!searchValue.trim()) {
-      setError('Please enter an Order ID or Tracking Number');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-    setOrder(null);
-    setTracking(null);
-
-    try {
-      if (searchType === 'orderId') {
-        // Search by Order ID (requires email for guest orders)
-        if (!email.trim()) {
-          setError('Please enter your email address');
-          return;
-        }
-
-        const emailParam = `?email=${encodeURIComponent(email)}`;
-        const response = await fetch(`${API_BASE_URL}/orders/track/${searchValue}${emailParam}`, {
-          headers: {
-            'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : '',
-          },
-        });
-
-        const data = await response.json();
-
-        if (!data.status) {
-          throw new Error(data.message || 'Order not found. Please check your Order ID and email address.');
-        }
-
-        setOrder(data.data.order);
-
-        // Fetch tracking if available
-        if (data.data.order.trackingNumber) {
-          const trackingResponse = await fetch(
-            `${API_BASE_URL}/orders/${data.data.order._id}/tracking`,
-            {
-              headers: {
-                'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : '',
-              },
-            }
-          );
-          const trackingData = await trackingResponse.json();
-          if (trackingData.status && trackingData.data.hasTracking) {
-            setTracking(trackingData.data.tracking);
-          }
-        }
-      } else {
-        // Search by Tracking Number
-        if (!email.trim()) {
-          setError('Please enter your email address');
-          return;
-        }
-
-        const emailParam = `?email=${encodeURIComponent(email)}`;
-        const response = await fetch(`${API_BASE_URL}/orders/track-by-number/${searchValue}${emailParam}`, {
-          headers: {
-            'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : '',
-          },
-        });
-
-        const data = await response.json();
-
-        if (!data.status) {
-          throw new Error(data.message || 'Order not found with this tracking number and email.');
-        }
-
-        setOrder(data.data.order);
-
-        // Fetch tracking details
-        const trackingResponse = await fetch(
-          `${API_BASE_URL}/orders/${data.data.order._id}/tracking`,
-          {
-            headers: {
-              'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : '',
-            },
-          }
-        );
-        const trackingData = await trackingResponse.json();
-        if (trackingData.status && trackingData.data.hasTracking) {
-          setTracking(trackingData.data.tracking);
-        }
+      if (!q) {
+        setError(lookupMode === 'orderId' ? 'Enter your order ID.' : 'Enter the tracking number.');
+        return;
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch order details');
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (!user && (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))) {
+        setError('Enter the email you used at checkout.');
+        return;
+      }
+
+      setLoading(true);
+      setOrder(null);
+      setTracking(null);
+      setTrackingError(null);
+
+      try {
+        let found: Order;
+        const guestEmail = user ? undefined : em;
+
+        if (lookupMode === 'trackingNumber') {
+          found = await getOrderByTrackingNumberApi(q, guestEmail);
+        } else {
+          try {
+            found = await getOrderByOrderIdApi(q, guestEmail);
+          } catch (primaryErr) {
+            if (isObjectId(q)) {
+              found = user ? await getOrderByIdApi(q) : await getGuestOrderApi(q, em);
+            } else {
+              throw primaryErr;
+            }
+          }
+        }
+
+        setOrder(found);
+
+        if (found.trackingNumber) {
+          setTrackingLoading(true);
+          try {
+            const res = await getOrderTrackingApi(found._id);
+            if (res.hasTracking && res.tracking) {
+              setTracking(res.tracking);
+            } else {
+              setTrackingError(res.message || 'Live courier updates are not available yet.');
+            }
+          } catch {
+            setTrackingError('Live courier updates are not available right now.');
+          } finally {
+            setTrackingLoading(false);
+          }
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error && err.message
+            ? err.message
+            : 'We could not find that order. Check the ID and email and try again.',
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user],
+  );
+
+  // Prefill from links in emails / WhatsApp, or from the order just placed.
+  useEffect(() => {
+    if (autoRan.current) return;
+    const tn = searchParams.get('trackingNumber') || searchParams.get('tracking');
+    const oid = searchParams.get('orderId') || searchParams.get('id');
+    const em = searchParams.get('email');
+    const last = !tn && !oid ? recallLastOrder() : null;
+
+    const nextMode: Mode = tn ? 'trackingNumber' : 'orderId';
+    const nextValue = tn || oid || last?.orderId || '';
+    const nextEmail = em || last?.email || user?.email || '';
+
+    if (!nextValue) return;
+    autoRan.current = true;
+    setMode(nextMode);
+    setValue(nextValue);
+    if (nextEmail) setEmail(nextEmail);
+    if (user || nextEmail) void lookup(nextMode, nextValue, nextEmail);
+  }, [searchParams, user, lookup]);
+
+  const supportEmail = settings?.contact?.supportEmail || 'vrateezfoodspvtltd@gmail.com';
+  const whatsapp = settings?.contact?.whatsapp;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-500 rounded-full mb-4">
-            <Package size={32} className="text-white" />
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Track Your Order</h1>
-          <p className="text-gray-600">
-            Enter your Order ID and email to see real-time delivery status
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            Find your Order ID in the order confirmation email or SMS
+    <main className="min-h-screen bg-parchment">
+      <section className="relative overflow-hidden bg-ink text-parchment">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.12]"
+          aria-hidden="true"
+          style={{ backgroundImage: 'radial-gradient(ellipse at 80% 20%, #E4A93D 0%, transparent 45%)' }}
+        />
+        <div className="relative max-w-5xl mx-auto px-5 md:px-8 pt-12 pb-20 md:pt-16 md:pb-24">
+          <p className="font-label text-[10px] tracking-[0.24em] uppercase text-millet/80 mb-3">Order tracking</p>
+          <h1 className="font-display italic text-4xl md:text-5xl leading-[1.05]">Where is my order?</h1>
+          <p className="mt-3 text-parchment/65 max-w-lg text-[15px]">
+            Enter your order ID or courier tracking number. Live scan updates come straight from the courier.
           </p>
         </div>
+      </section>
 
-        {/* Search Form */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-8">
-          <form onSubmit={handleSearch} className="space-y-6">
-            {/* Search Type Toggle */}
-            <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
-              <button
-                type="button"
-                onClick={() => setSearchType('orderId')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition ${
-                  searchType === 'orderId'
-                    ? 'bg-white text-gray-900 shadow'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Order ID
-              </button>
-              <button
-                type="button"
-                onClick={() => setSearchType('trackingNumber')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition ${
-                  searchType === 'trackingNumber'
-                    ? 'bg-white text-gray-900 shadow'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Tracking Number
-              </button>
-            </div>
+      <div className="max-w-5xl mx-auto px-5 md:px-8 -mt-12 md:-mt-14 pb-20">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void lookup(mode, value, email);
+          }}
+          className="rounded-[22px] bg-white ring-1 ring-ink/[0.08] shadow-[0_30px_70px_-40px_rgba(36,31,22,0.5)] p-5 md:p-7"
+        >
+          <div className="inline-flex rounded-full bg-ink/[0.05] p-1 mb-5">
+            {(
+              [
+                { id: 'orderId', label: 'Order ID', icon: Hash },
+                { id: 'trackingNumber', label: 'Tracking number', icon: Truck },
+              ] as Array<{ id: Mode; label: string; icon: typeof Hash }>
+            ).map((opt) => {
+              const Icon = opt.icon;
+              const active = mode === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setMode(opt.id)}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold transition ${
+                    active ? 'bg-ink text-parchment shadow' : 'text-ink/60 hover:text-ink'
+                  }`}
+                >
+                  <Icon size={13} />
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
 
-            {/* Search Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {searchType === 'orderId' ? 'Order ID' : 'Tracking Number'}
-              </label>
+          <div className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr_auto] gap-3 items-end">
+            <label className="block">
+              <span className="block font-label text-[10px] tracking-[0.16em] uppercase text-ink/50 mb-1.5">
+                {mode === 'orderId' ? 'Order ID' : 'Tracking number'}
+              </span>
               <div className="relative">
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/30" />
                 <input
                   type="text"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  placeholder={searchType === 'orderId' ? 'e.g., VRZ001' : 'e.g., SF123456789'}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  placeholder={mode === 'orderId' ? 'e.g. #A1B2C3 or VRZ-1024' : 'e.g. SF3583515448'}
+                  className={`${inputCls} pl-11`}
+                  autoComplete="off"
                 />
               </div>
-            </div>
-
-            {/* Email Input (always required) */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Enter the email address used during checkout
-              </p>
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                <AlertCircle size={18} className="flex-shrink-0" />
-                <p>{error}</p>
+            </label>
+            <label className="block">
+              <span className="block font-label text-[10px] tracking-[0.16em] uppercase text-ink/50 mb-1.5">Email</span>
+              <div className="relative">
+                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/30" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className={`${inputCls} pl-11`}
+                  disabled={Boolean(user)}
+                  autoComplete="email"
+                />
               </div>
-            )}
-
-            {/* Submit Button */}
+            </label>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="inline-flex h-[50px] items-center justify-center gap-2 rounded-xl bg-turmeric px-6 text-sm font-semibold text-parchment shadow-lg shadow-turmeric/25 transition hover:bg-clay disabled:opacity-60"
             >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                  Searching...
-                </>
-              ) : (
-                <>
-                  <Search size={18} />
-                  Track Order
-                </>
-              )}
+              {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+              {loading ? 'Looking up' : 'Track'}
             </button>
-          </form>
-        </div>
+          </div>
 
-        {/* Order Details */}
-        {order && (
-          <div className="space-y-6">
-            {/* Order Info Card */}
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-              <div className="flex items-center justify-between mb-6">
+          <p className="mt-3 text-xs text-ink/45">
+            {user
+              ? 'Signed in: we match orders to your account automatically.'
+              : 'Your order ID is in the confirmation email and on the order success page.'}
+          </p>
+
+          {error ? (
+            <div className="mt-4 flex items-start gap-2 rounded-xl bg-clay/10 ring-1 ring-clay/20 px-4 py-3 text-sm text-clay">
+              <AlertCircle size={16} className="mt-0.5 shrink-0" />
+              <p>{error}</p>
+            </div>
+          ) : null}
+        </form>
+
+        {order ? (
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-6 items-start">
+            <div className="space-y-6">
+              <div className="rounded-[22px] bg-white ring-1 ring-ink/[0.08] p-5 md:p-6 flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    Order {order.orderId || `#${order._id.slice(-8)}`}
-                  </h2>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Placed on {formatDate(order.createdAt)}
-                  </p>
+                  <p className="font-label text-[10px] tracking-[0.2em] uppercase text-ink/45">Order</p>
+                  <p className="font-display text-2xl text-ink leading-tight mt-1">{displayOrderId(order)}</p>
+                  <p className="text-xs text-ink/45 mt-1">Placed {formatDateTime(order.createdAt)}</p>
                 </div>
-                <span
-                  className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    statusColors[order.orderStatus] || 'bg-gray-100 text-gray-700'
-                  }`}
-                >
-                  {order.orderStatus.toUpperCase()}
+                <span className={`inline-flex rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${STATUS_PILL[order.orderStatus]}`}>
+                  {order.orderStatus}
                 </span>
               </div>
 
-              {/* Order Items */}
-              <div className="border-t border-gray-200 pt-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Order Items</h3>
-                <div className="space-y-3">
-                  {order.items.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-900">{item.name}</p>
-                        <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
-                      </div>
-                      <p className="font-semibold text-gray-900">
-                        {formatCurrency(item.price * item.quantity)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Order Summary */}
-                <div className="mt-6 pt-6 border-t border-gray-200 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="text-gray-900">{formatCurrency(order.subtotal)}</span>
-                  </div>
-                  {order.discountAmount > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Discount</span>
-                      <span className="text-green-600">-{formatCurrency(order.discountAmount)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Shipping</span>
-                    <span className="text-gray-900">
-                      {order.shippingCharge === 0 ? 'FREE' : formatCurrency(order.shippingCharge)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
-                    <span>Total</span>
-                    <span className="text-orange-500">{formatCurrency(order.totalAmount)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Shipping Address */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <MapPin size={18} />
-                  Shipping Address
-                </h3>
-                <div className="text-sm text-gray-700">
-                  <p>{order.shippingAddress.line1}</p>
-                  {order.shippingAddress.line2 && <p>{order.shippingAddress.line2}</p>}
-                  <p>
-                    {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.pincode}
-                  </p>
-                </div>
-              </div>
+              <TrackingTimeline order={order} tracking={tracking} trackingLoading={trackingLoading} trackingError={trackingError} />
             </div>
 
-            {/* Tracking Info Card */}
-            {tracking ? (
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-orange-100 rounded-lg">
-                    <Truck size={24} className="text-orange-500" />
+            <aside className="space-y-6 lg:sticky lg:top-28">
+              <div className="rounded-[22px] bg-white ring-1 ring-ink/[0.08] p-5 md:p-6">
+                <h3 className="font-display text-lg text-ink mb-4 flex items-center gap-2">
+                  <Package size={18} className="text-clay" />
+                  Items
+                </h3>
+                <ul className="space-y-3">
+                  {order.items.map((item, i) => (
+                    <li key={`${item.name}-${i}`} className="flex items-center gap-3">
+                      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-parchment ring-1 ring-ink/[0.06]">
+                        <Image src={resolveImage(item.image)} alt={item.name} fill className="object-cover" sizes="48px" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-ink">{item.name}</p>
+                        <p className="text-xs text-ink/45">Qty {item.quantity}</p>
+                      </div>
+                      <p className="text-sm font-semibold text-ink">{formatInr(item.price * item.quantity)}</p>
+                    </li>
+                  ))}
+                </ul>
+                <dl className="mt-5 space-y-1.5 border-t border-ink/[0.08] pt-4 text-sm">
+                  <div className="flex justify-between text-ink/60">
+                    <dt>Subtotal</dt>
+                    <dd>{formatInr(order.subtotal)}</dd>
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Live Tracking</h2>
-                    <p className="text-sm text-gray-500">Real-time shipment updates</p>
-                  </div>
-                </div>
-
-                {/* Tracking Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1">Tracking Number</p>
-                    <p className="font-mono font-semibold text-gray-900">{tracking.trackingNumber}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1">Courier Partner</p>
-                    <p className="font-semibold text-gray-900 capitalize">{tracking.trackingProvider}</p>
-                  </div>
-                </div>
-
-                {/* Current Status */}
-                <div className="p-6 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border border-orange-200 mb-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <span
-                      className={`inline-flex px-4 py-2 rounded-full text-sm font-medium ${
-                        trackingStatusColors[tracking.status] || 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {tracking.statusLabel}
-                    </span>
-                    {tracking.lastEventTime && (
-                      <span className="text-sm text-gray-600 flex items-center gap-1">
-                        <Clock size={14} />
-                        {formatDate(tracking.lastEventTime)}
-                      </span>
-                    )}
-                  </div>
-                  {tracking.destinationCity && (
-                    <p className="text-sm text-gray-700 flex items-center gap-1">
-                      <MapPin size={14} />
-                      Destination: {tracking.destinationCity}
-                      {tracking.destinationState && `, ${tracking.destinationState}`}
-                    </p>
-                  )}
-                  {tracking.estimatedDelivery && (
-                    <p className="text-sm text-gray-700 mt-2">
-                      Estimated Delivery: {formatDate(tracking.estimatedDelivery)}
-                    </p>
-                  )}
-                </div>
-
-                {/* Tracking Timeline */}
-                {tracking.events && tracking.events.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-4">Tracking Timeline</h3>
-                    <div className="space-y-4">
-                      {tracking.events.map((event, index) => (
-                        <div key={index} className="flex gap-4">
-                          <div className="flex flex-col items-center">
-                            <div
-                              className={`w-4 h-4 rounded-full ${
-                                index === 0
-                                  ? 'bg-orange-500 ring-4 ring-orange-100'
-                                  : 'bg-gray-300'
-                              }`}
-                            />
-                            {index < tracking.events.length - 1 && (
-                              <div className="w-0.5 h-full bg-gray-300 mt-1" />
-                            )}
-                          </div>
-                          <div className="flex-1 pb-6">
-                            <div className="flex items-start justify-between mb-1">
-                              <p className="font-medium text-gray-900">{event.message}</p>
-                              <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                                {formatDate(event.datetime)}
-                              </span>
-                            </div>
-                            {(event.location.city || event.source) && (
-                              <p className="text-sm text-gray-600">
-                                {event.location.city && `${event.location.city}, `}
-                                {event.location.state && `${event.location.state} • `}
-                                {event.source}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                  {order.discountAmount > 0 ? (
+                    <div className="flex justify-between text-basil">
+                      <dt>Discount{order.couponCode ? ` (${order.couponCode})` : ''}</dt>
+                      <dd>-{formatInr(order.discountAmount)}</dd>
                     </div>
+                  ) : null}
+                  <div className="flex justify-between text-ink/60">
+                    <dt>Shipping</dt>
+                    <dd className={order.shippingCharge === 0 ? 'text-basil font-medium' : ''}>
+                      {order.shippingCharge === 0 ? 'Free' : formatInr(order.shippingCharge)}
+                    </dd>
                   </div>
-                )}
+                  <div className="flex justify-between border-t border-ink/[0.08] pt-2 font-display text-lg text-ink">
+                    <dt>Total</dt>
+                    <dd>{formatInr(order.totalAmount)}</dd>
+                  </div>
+                  <div className="flex justify-between text-xs text-ink/50 pt-1">
+                    <dt>{paymentMethodLabel(order.paymentMethod)}</dt>
+                    <dd className="capitalize">{order.paymentStatus}</dd>
+                  </div>
+                </dl>
               </div>
-            ) : order.trackingNumber ? (
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                  <Truck size={32} className="text-gray-400" />
+
+              <div className="rounded-[22px] bg-white ring-1 ring-ink/[0.08] p-5 md:p-6">
+                <h3 className="font-display text-lg text-ink mb-3 flex items-center gap-2">
+                  <MapPin size={18} className="text-clay" />
+                  Delivering to
+                </h3>
+                <p className="text-sm text-ink/70 leading-relaxed">
+                  {order.guestInfo?.name ? <span className="block font-medium text-ink">{order.guestInfo.name}</span> : null}
+                  {order.shippingAddress.line1}
+                  {order.shippingAddress.line2 ? `, ${order.shippingAddress.line2}` : ''}
+                  <br />
+                  {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.pincode}
+                </p>
+              </div>
+
+              <div className="rounded-[22px] bg-ink text-parchment p-5 md:p-6">
+                <p className="font-label text-[10px] tracking-[0.2em] uppercase text-millet/80 mb-2">Need help?</p>
+                <p className="text-sm text-parchment/70 leading-relaxed">
+                  Quote order {displayOrderId(order)} and we will sort it out.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <a
+                    href={`mailto:${supportEmail}?subject=${encodeURIComponent(`Order ${displayOrderId(order)}`)}`}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-parchment/10 px-3.5 py-2 text-xs font-semibold text-parchment ring-1 ring-parchment/15 hover:bg-parchment/20"
+                  >
+                    <Mail size={13} /> Email support
+                  </a>
+                  {whatsapp ? (
+                    <a
+                      href={`https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi, I need help with order ${displayOrderId(order)}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-millet px-3.5 py-2 text-xs font-semibold text-ink hover:bg-parchment"
+                    >
+                      WhatsApp us <ArrowRight size={13} />
+                    </a>
+                  ) : null}
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Tracking Information</h3>
-                <p className="text-gray-600 mb-4">
-                  Tracking Number: <span className="font-mono font-semibold">{order.trackingNumber}</span>
-                </p>
-                <p className="text-sm text-gray-500">
-                  Tracking details are being fetched from the courier. Please check back in a few moments.
-                </p>
               </div>
-            ) : (
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                  <Package size={32} className="text-gray-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Tracking Available Yet</h3>
-                <p className="text-sm text-gray-600">
-                  Your order is being processed. Tracking information will be available once your order is shipped.
-                </p>
-              </div>
-            )}
+            </aside>
           </div>
-        )}
+        ) : !loading ? (
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { icon: Package, title: 'Packed fresh', body: 'Orders are baked and packed within 24 to 48 hours of confirmation.' },
+              { icon: Truck, title: 'Shipped pan-India', body: `Typical delivery in ${settings?.shipping?.deliveryDays || '3 to 7 days'} depending on your pincode.` },
+              { icon: Mail, title: 'Updates on WhatsApp', body: 'You get the tracking number the moment the courier picks it up.' },
+            ].map(({ icon: Icon, title, body }) => (
+              <div key={title} className="rounded-[22px] bg-white/70 ring-1 ring-ink/[0.06] p-5">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-turmeric/10 text-clay mb-3">
+                  <Icon size={16} />
+                </span>
+                <p className="font-semibold text-ink text-sm">{title}</p>
+                <p className="mt-1 text-xs text-ink/55 leading-relaxed">{body}</p>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        <p className="mt-10 text-center text-xs text-ink/45">
+          Can&apos;t find your order?{' '}
+          <a href={`mailto:${supportEmail}`} className="text-clay underline underline-offset-4">
+            {supportEmail}
+          </a>{' '}
+          ·{' '}
+          <Link href="/shop" className="text-clay underline underline-offset-4">
+            Back to shop
+          </Link>
+        </p>
       </div>
-    </div>
+    </main>
+  );
+}
+
+export default function TrackOrderPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-parchment flex items-center justify-center text-ink/50 text-sm">Loading tracker…</main>
+      }
+    >
+      <TrackOrderContent />
+    </Suspense>
   );
 }

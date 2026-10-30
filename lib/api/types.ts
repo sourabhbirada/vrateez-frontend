@@ -232,9 +232,32 @@ export interface Cart {
   items: CartItem[];
 }
 
+export interface LiveTrackingEvent {
+  message: string;
+  status: string;
+  statusLabel: string;
+  datetime: string;
+  source?: string;
+  location?: { city?: string; state?: string; country?: string; zip?: string };
+}
+
+export interface LiveTracking {
+  trackingNumber: string;
+  trackingProvider: string;
+  orderId?: string;
+  status: string;
+  statusLabel: string;
+  estimatedDelivery?: string | null;
+  lastEventTime?: string | null;
+  destinationCity?: string | null;
+  destinationState?: string | null;
+  events: LiveTrackingEvent[];
+}
+
 export interface Order {
   _id: string;
-  user?: string;
+  orderId?: string;
+  user?: string | { _id: string; name?: string; email?: string; phone?: string };
   guestInfo?: {
     name: string;
     email: string;
@@ -275,6 +298,14 @@ export interface Order {
     location?: string;
     createdAt: string;
   }>;
+  shipmentTrackingHistory?: Array<{
+    actionDate?: string;
+    actionTime?: string;
+    actionLocation?: string;
+    actionDescription?: string;
+    receivedAt?: string;
+  }>;
+  lastShipmentStatus?: string;
   createdAt: string;
   updatedAt: string;
 }

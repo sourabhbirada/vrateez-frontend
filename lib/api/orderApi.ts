@@ -1,11 +1,12 @@
 import api from "./axios";
-import type { ApiResponse, Order, GuestInfo, ShippingAddress } from "./types";
+import type { ApiResponse, Order, GuestInfo, ShippingAddress, LiveTracking } from "./types";
 
 export type PaymentMethod = "card" | "upi" | "netbanking" | "cod" | "razorpay";
 
 export interface OrderTrackingData {
   hasTracking: boolean;
-  tracking?: any;
+  tracking?: LiveTracking;
+  source?: string;
   orderId?: string;
   message?: string;
   fallback?: {
