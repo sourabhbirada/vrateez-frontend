@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Package, MapPin, Clock, Truck, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+import { API_BASE_URL } from '@/lib/api/config';
 
 type TrackingEvent = {
   message: string;
@@ -106,6 +106,21 @@ export default function TrackOrderPage() {
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Track your Vrateez order in real-time. Enter your Order ID or Tracking Number to see live delivery status of your healthy vrat snacks and protein cookies.');
+    }
+  }, []);
+
+  // Prefill from WhatsApp / email deep links (?trackingNumber=... or ?orderId=...)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const tn = params.get('trackingNumber') || params.get('tracking');
+    const oid = params.get('orderId');
+    if (tn) {
+      setSearchType('trackingNumber');
+      setSearchValue(tn);
+    } else if (oid) {
+      setSearchType('orderId');
+      setSearchValue(oid);
     }
   }, []);
 

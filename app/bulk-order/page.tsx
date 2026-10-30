@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { Send, Phone, Mail, MapPin, CheckCircle2 } from 'lucide-react';
+import { apiUrl } from '@/lib/api/config';
 
 const WHY_PARTNER = [
     'Custom pricing for bulk orders',
@@ -16,8 +17,7 @@ const WHY_PARTNER = [
 ];
 
 export default function BulkOrderPage() {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
-    const BULK_ORDER_URL = `${API_BASE_URL}/bulk-order`;
+    const BULK_ORDER_URL = apiUrl('/bulk-order');
 
     const [formData, setFormData] = useState({
         companyName: '',

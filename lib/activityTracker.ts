@@ -1,5 +1,6 @@
 import Cookies from "js-cookie";
 import { v4 as uuidv4 } from "uuid";
+import { apiUrl } from "./api/config";
 
 // Cookie names
 const VISITOR_ID_COOKIE = "vrateez_visitor_id";
@@ -140,8 +141,8 @@ class ActivityTracker {
 				duration: data.duration,
 			};
 
-			// Send to backend using relative URL (goes through Next.js rewrite)
-			await fetch('/api/activity/track', {
+			// Send to backend (Render URL from lib/api/config)
+			await fetch(apiUrl("/activity/track"), {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

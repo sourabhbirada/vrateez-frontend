@@ -1,9 +1,10 @@
 import axios from "axios";
 import { getToken } from "./storage";
+import { API_BASE_URL } from "./config";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "/api",
-  timeout: 15000,
+  baseURL: API_BASE_URL,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -19,15 +20,15 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
-    (error) => {
-      const responseData = error?.response?.data;
+  (error) => {
+    const responseData = error?.response?.data;
 
-      const message =
-        responseData?.message ||
-        responseData?.error ||
-        responseData?.errors?.[0]?.message ||
-        error?.message ||
-        "Something went wrong. Please try again.";
+    const message =
+      responseData?.message ||
+      responseData?.error ||
+      responseData?.errors?.[0]?.message ||
+      error?.message ||
+      "Something went wrong. Please try again.";
 
     return Promise.reject(new Error(message));
   },
