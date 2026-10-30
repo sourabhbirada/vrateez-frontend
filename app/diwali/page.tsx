@@ -20,7 +20,7 @@ const FALLBACK_LANDING_DEAL: Deal = {
   badge: 'LIMITED TIME OFFER',
   cta: 'Order Now',
   ctaLink: '/product/diwali-gift-hamper',
-  image: '/diwaligift.png',
+  image: '/diwali-hamper.png',
   video: '',
   price: 379,
   originalPrice: 499,
