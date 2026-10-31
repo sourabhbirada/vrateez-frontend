@@ -2,6 +2,7 @@
 
 import HeroSection from '@/component/home/HeroSection';
 import UspStrip from '@/component/home/UspStrip';
+import WhyVrateezSection from '@/component/home/WhyVrateezSection';
 import DealOfferSection from '@/component/home/DealOfferSection';
 import BestsellersSection from '@/component/home/BestsellersSection';
 import BundlesSection from '@/component/home/BundlesSection';
@@ -32,6 +33,7 @@ export default function HomePage() {
   return (
     <main>
       {(sections?.heroCarousel ?? true) && <HeroSection />}
+      <WhyVrateezSection />
       <UspStrip />
       <DealOfferSection />
       <BestsellersSection />

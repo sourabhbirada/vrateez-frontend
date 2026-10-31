@@ -14,7 +14,7 @@ const ROWS = [
 
 export default function CompareSection() {
   return (
-    <section className="bg-parchment py-16 md:py-20">
+    <section className="bg-parchment py-16 md:py-20 scroll-mt-24" id="compare">
       <div className="max-w-5xl mx-auto px-4 md:px-8">
         <div className="text-center max-w-2xl mx-auto mb-10">
           <p className="font-label text-[10px] tracking-[0.24em] uppercase text-clay mb-3">The honest comparison</p>
