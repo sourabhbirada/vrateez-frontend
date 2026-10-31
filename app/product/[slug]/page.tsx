@@ -11,6 +11,7 @@ import { getProductBySlugApi, getProductsApi } from '@/lib/api/productApi';
 import type { Product as ApiProduct, ProductCategory } from '@/lib/api/types';
 import { getProductCategoryLabel } from '@/lib/api/types';
 import { getEffectiveUnitPrice, getPackLabel, getPackTotal, type PackOption } from '@/lib/packPricing';
+import { trackViewItem } from '@/lib/analytics';
 
 interface ProductView {
     id: string | number;
@@ -88,6 +89,7 @@ export default function ProductPage() {
                 ]);
 
                 setProduct(mapApiProductToView(apiProduct));
+                trackViewItem({ id: apiProduct._id, name: apiProduct.name, price: apiProduct.price, category: apiProduct.category });
                 setAllProducts(apiList.items.map(mapApiProductToView));
                 const defaults: Record<string, string> = {};
                 apiProduct.customization?.options?.forEach((opt) => {
@@ -185,6 +187,37 @@ export default function ProductPage() {
 
     return (
         <main className="bg-parchment min-h-screen">
+            {product ? (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify({
+                            '@context': 'https://schema.org',
+                            '@type': 'Product',
+                            name: product.name,
+                            image: (product.images?.length ? product.images : [product.image])
+                                .map((img) => resolveImage(img))
+                                .map((img) => (img.startsWith('http') ? img : `${(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.vrateez.in').replace(/\/$/, '')}${img}`)),
+                            description: product.description,
+                            sku: product.slug,
+                            brand: { '@type': 'Brand', name: 'Vrateez' },
+                            category: getProductCategoryLabel(product.category),
+                            ...(product.reviews > 0
+                                ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: product.rating, reviewCount: product.reviews } }
+                                : {}),
+                            offers: {
+                                '@type': 'Offer',
+                                url: `${(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.vrateez.in').replace(/\/$/, '')}/product/${product.slug}`,
+                                priceCurrency: 'INR',
+                                price: product.price,
+                                availability: 'https://schema.org/InStock',
+                                itemCondition: 'https://schema.org/NewCondition',
+                                seller: { '@type': 'Organization', name: 'Vrateez' },
+                            },
+                        }),
+                    }}
+                />
+            ) : null}
             {/* Breadcrumb */}
             <div className="max-w-7xl mx-auto px-8 pt-8">
                 <Link href="/shop" className="inline-flex items-center gap-1 text-sm text-ink/50 hover:text-ink transition">

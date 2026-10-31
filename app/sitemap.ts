@@ -1,79 +1,50 @@
-import { MetadataRoute } from 'next'
+import type { MetadataRoute } from 'next';
+import { API_BASE_URL } from '@/lib/api/config';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vrateez.com'
+type ProductLite = { slug: string; isActive?: boolean; category?: string; updatedAt?: string };
 
-  // Static pages
-  const routes = [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/shop`,
-      lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/diwali`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/track-order`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/about-us`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/bulk-order`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/faq`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.5,
-    },
-  ]
+async function fetchProducts(): Promise<ProductLite[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/products?limit=200`, { next: { revalidate: 3600 } });
+    if (!res.ok) return [];
+    const json = (await res.json()) as { data?: { items?: ProductLite[] } };
+    return json.data?.items || [];
+  } catch {
+    return [];
+  }
+}
 
-  // Category pages - Vrat-friendly and health-focused
-  const categories = [
-    'cookies',
-    'infused-cookie',
-    'energy-on-the-go',
-    'savory-snacks',
-    'wholesome-delights',
-  ]
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.vrateez.in').replace(/\/$/, '');
+  const now = new Date();
 
-  const categoryRoutes = categories.map(category => ({
+  const routes: MetadataRoute.Sitemap = [
+    { url: baseUrl, lastModified: now, changeFrequency: 'daily', priority: 1 },
+    { url: `${baseUrl}/shop`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/diwali`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${baseUrl}/track-order`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
+    { url: `${baseUrl}/about-us`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${baseUrl}/bulk-order`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${baseUrl}/faq`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
+  ];
+
+  const categories = ['cookies', 'infused-cookie', 'energy-on-the-go', 'savory-snacks', 'wholesome-delights'];
+  const categoryRoutes: MetadataRoute.Sitemap = categories.map((category) => ({
     url: `${baseUrl}/shop?category=${category}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily' as const,
+    lastModified: now,
+    changeFrequency: 'daily',
     priority: 0.8,
-  }))
+  }));
 
-  // TODO: Add dynamic product pages
-  // Fetch from API and add product URLs
-  // const products = await getProductsApi({ limit: 100 })
-  // const productRoutes = products.items.map(product => ({
-  //   url: `${baseUrl}/product/${product.slug}`,
-  //   lastModified: new Date(),
-  //   changeFrequency: 'weekly' as const,
-  //   priority: 0.7,
-  // }))
+  const products = await fetchProducts();
+  const productRoutes: MetadataRoute.Sitemap = products
+    .filter((p) => p.slug && p.isActive !== false && p.category !== 'testing')
+    .map((p) => ({
+      url: `${baseUrl}/product/${p.slug}`,
+      lastModified: p.updatedAt ? new Date(p.updatedAt) : now,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    }));
 
-  return [...routes, ...categoryRoutes]
+  return [...routes, ...categoryRoutes, ...productRoutes];
 }

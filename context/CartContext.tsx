@@ -5,6 +5,7 @@ import { addCartItemApi, clearCartApi, getCartApi, removeCartItemApi, updateCart
 import { getToken } from '@/lib/api/storage';
 import type { Cart } from '@/lib/api/types';
 import { getEffectiveUnitPrice } from '@/lib/packPricing';
+import { trackAddToCart } from '@/lib/analytics';
 
 export interface CartItem {
     id: string;
@@ -142,6 +143,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const toggleCart = useCallback(() => setIsOpen(prev => !prev), []);
 
     const addToCart = useCallback((item: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
+        trackAddToCart({ id: item.id, name: item.name, price: item.price, quantity: item.quantity ?? 1 });
         const qty = Math.max(1, item.quantity ?? 1);
         if (!isValidGuestItemId(item.id)) {
             console.error('Cannot add item with invalid ID:', item.id);

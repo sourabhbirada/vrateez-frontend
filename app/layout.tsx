@@ -9,6 +9,7 @@ import AuthModal from '../component/auth/AuthModal';
 import WhatsAppButton from '../component/ui/WhatsAppButton';
 import CookieConsent from '../component/common/CookieConsent';
 import ActivityTracker from '../component/common/ActivityTracker';
+import Analytics from '../component/common/Analytics';
 import { CartProvider } from '../context/CartContext';
 import { AuthProvider } from '../context/AuthContext';
 import { SettingsProvider } from '../context/SettingsContext';
@@ -288,6 +289,7 @@ export default function RootLayout({
           <SettingsProvider>
             <CartProvider>
               <ActivityTracker />
+              <Analytics />
               <AnnouncementBar />
               <Header />
               {children}

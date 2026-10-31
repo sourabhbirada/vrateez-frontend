@@ -38,6 +38,7 @@ import { isPaymentCancelledError, openRazorpayCheckout } from '@/lib/razorpay';
 import type { ShippingAddress, GuestInfo, Order } from '@/lib/api/types';
 import { resolveImage } from '@/lib/images';
 import { formatInr, isObjectId, rememberLastOrder } from '@/lib/orderUtils';
+import { trackBeginCheckout } from '@/lib/analytics';
 
 type PaymentMode = 'online' | 'cod';
 type FieldKey = 'name' | 'email' | 'phone' | 'line1' | 'city' | 'state' | 'pincode';
@@ -169,6 +170,13 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (user?.phone) setContactPhone(user.phone);
   }, [user?.phone]);
+
+  const checkoutTracked = useRef(false);
+  useEffect(() => {
+    if (!hydrated || !items.length || checkoutTracked.current) return;
+    checkoutTracked.current = true;
+    trackBeginCheckout(items, totalPrice);
+  }, [hydrated, items, totalPrice]);
 
   useEffect(() => {
     if (!codEnabled) setPaymentMode('online');

@@ -21,6 +21,7 @@ export default function CookieConsent() {
 
 	const handleAccept = () => {
 		activityTracker.acceptCookies();
+		window.dispatchEvent(new Event('vrateez:consent-accepted'));
 		setShowBanner(false);
 	};
 

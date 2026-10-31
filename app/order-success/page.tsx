@@ -12,6 +12,7 @@ import type { Order } from '@/lib/api/types';
 import { resolveImage } from '@/lib/images';
 import { displayOrderId, formatDateTime, formatInr, paymentMethodLabel, recallLastOrder } from '@/lib/orderUtils';
 import { OrderStatusStepper } from '@/component/order/TrackingTimeline';
+import { trackPurchase } from '@/lib/analytics';
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
@@ -48,7 +49,10 @@ function OrderSuccessContent() {
           fetched = await getGuestOrderApi(orderId, email);
         }
         if (!fetched) throw new Error('not found');
-        if (!cancelled) setOrder(fetched);
+        if (!cancelled) {
+          setOrder(fetched);
+          trackPurchase(fetched);
+        }
       } catch {
         if (!cancelled) setError('Your order was placed, but we could not load its details right now.');
       } finally {
@@ -307,6 +311,17 @@ function OrderSuccessContent() {
                   >
                     Continue shopping
                   </Link>
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(
+                      `Just ordered from Vrateez: vrat-friendly, zero added sugar snacks that actually taste good. Free delivery above ₹${settings?.shipping?.freeShippingThreshold ?? 499}. ${(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.vrateez.in').replace(/\/$/, '')}/shop`,
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-parchment px-6 py-3 text-sm font-semibold text-ink ring-1 ring-ink/10 transition hover:bg-[#25D366]/15"
+                  >
+                    <MessageCircle size={15} className="text-[#128C7E]" />
+                    Share with a friend
+                  </a>
                 </div>
               </div>
 
