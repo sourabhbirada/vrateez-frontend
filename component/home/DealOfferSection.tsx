@@ -124,7 +124,7 @@ function DealCard({ deal }: { deal: Deal }) {
             <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24">
                 <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-16 items-center">
                     {/* Media */}
-                    <div className="relative">
+                    <div className="relative" data-reveal>
                         <div className="absolute -inset-3 md:-inset-4 rounded-[28px] border border-millet/20" aria-hidden="true" />
                         <div className="absolute -inset-6 md:-inset-8 rounded-[36px] border border-millet/10" aria-hidden="true" />
 
@@ -190,7 +190,7 @@ function DealCard({ deal }: { deal: Deal }) {
                     </div>
 
                     {/* Copy */}
-                    <div className="space-y-8 lg:pl-4">
+                    <div className="space-y-8 lg:pl-4" data-reveal data-reveal-delay="150">
                         <div>
                             <p className="font-label text-[10px] tracking-[0.24em] uppercase text-millet/80 mb-4 flex items-center gap-2">
                                 <Gift size={13} />

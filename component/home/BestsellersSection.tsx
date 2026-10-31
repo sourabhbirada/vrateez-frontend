@@ -71,7 +71,7 @@ export default function BestsellersSection() {
   return (
     <section className="bg-parchment py-16 md:py-20" id="bestsellers">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-8 md:mb-10">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-8 md:mb-10" data-reveal>
           <div>
             <p className="font-label text-[10px] tracking-[0.24em] uppercase text-clay mb-3">Start here</p>
             <h2 className="font-display italic text-4xl md:text-5xl text-ink leading-none">Bestsellers</h2>
@@ -99,7 +99,7 @@ export default function BestsellersSection() {
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {top.map((p, i) => (
-            <div key={p._id} className="relative">
+            <div key={p._id} className="relative" data-reveal data-reveal-delay={String(i * 90)}>
               {i === 0 ? (
                 <span className="absolute -top-2 left-3 z-10 rounded-full bg-turmeric text-parchment font-label text-[9px] tracking-[0.16em] uppercase px-2.5 py-1 shadow">
                   #1 seller

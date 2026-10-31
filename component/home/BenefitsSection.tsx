@@ -45,7 +45,7 @@ export default function BenefitsSection() {
   return (
     <section className="py-16 md:py-20 bg-parchment">
       <div className="max-w-7xl mx-auto px-8">
-        <div className="text-center mb-14">
+        <div className="text-center mb-14" data-reveal>
           <p className="font-label text-[11px] tracking-[0.25em] text-clay uppercase mb-3">Our Promise</p>
           <h2 className="font-display italic text-3xl md:text-4xl text-ink mb-3 tracking-tight">
             Why Choose Vrateez?
@@ -56,8 +56,8 @@ export default function BenefitsSection() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-6">
-          {benefits.map((b) => (
-            <div key={`${b.title}-${b.subtitle}`} className="flex flex-col items-center text-center group">
+          {benefits.map((b, i) => (
+            <div key={`${b.title}-${b.subtitle}`} className="flex flex-col items-center text-center group" data-reveal data-reveal-delay={String(i * 80)}>
               <div
                 className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden mb-5 group-hover:scale-105 transition-transform duration-300 border border-ink/10"
                 style={{ backgroundColor: b.bgColor || '#F5E6C8' }}

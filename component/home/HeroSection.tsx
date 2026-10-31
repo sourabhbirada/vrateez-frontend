@@ -301,10 +301,11 @@ export default function HeroSection() {
                             </video>
                         ) : slide.image ? (
                             <Image
+                                key={slide.image}
                                 src={resolveImage(slide.image)}
                                 alt={slide.title}
                                 fill
-                                className={`object-cover ${slide.imagePosition}`}
+                                className={`object-cover animate-kenburns ${slide.imagePosition}`}
                                 priority
                                 sizes="(min-width: 768px) 58vw, 100vw"
                             />

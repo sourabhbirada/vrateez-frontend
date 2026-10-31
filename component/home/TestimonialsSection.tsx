@@ -68,7 +68,7 @@ export default function TestimonialsSection() {
   return (
     <section className="py-20 bg-parchment">
       <div className="max-w-7xl mx-auto px-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-12" data-reveal>
           <p className="font-label text-[11px] tracking-[0.25em] text-clay uppercase mb-3">Reviews</p>
           <h2 className="font-display italic text-3xl md:text-4xl text-ink mb-3 tracking-tight">
             Loved by Thousands
@@ -80,7 +80,7 @@ export default function TestimonialsSection() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {testimonials.map((t) => {
+          {testimonials.map((t, i) => {
             const initials =
               t.avatar ||
               t.name
@@ -92,6 +92,8 @@ export default function TestimonialsSection() {
             return (
               <div
                 key={t._id}
+                data-reveal
+                data-reveal-delay={String(i * 90)}
                 className="bg-white/60 rounded-2xl p-7 border border-ink/10 shadow-sm hover:shadow-md hover:border-turmeric/30 transition-all"
               >
                 <Quote size={20} className="text-turmeric/50 mb-4" />

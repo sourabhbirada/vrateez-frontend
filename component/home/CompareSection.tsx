@@ -16,7 +16,7 @@ export default function CompareSection() {
   return (
     <section className="bg-parchment py-16 md:py-20 scroll-mt-24" id="compare">
       <div className="max-w-5xl mx-auto px-4 md:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-10">
+        <div className="text-center max-w-2xl mx-auto mb-10" data-reveal>
           <p className="font-label text-[10px] tracking-[0.24em] uppercase text-clay mb-3">The honest comparison</p>
           <h2 className="font-display italic text-4xl md:text-5xl text-ink leading-none">Same crunch. None of the junk.</h2>
           <p className="mt-4 text-[15px] text-ink/55">
@@ -24,7 +24,7 @@ export default function CompareSection() {
           </p>
         </div>
 
-        <div className="overflow-hidden rounded-[24px] ring-1 ring-ink/[0.08] bg-white shadow-[0_30px_70px_-45px_rgba(36,31,22,0.5)]">
+        <div className="overflow-hidden rounded-[24px] ring-1 ring-ink/[0.08] bg-white shadow-[0_30px_70px_-45px_rgba(36,31,22,0.5)]" data-reveal data-reveal-delay="120">
           <div className="grid grid-cols-[1.1fr_1.3fr_1.3fr] md:grid-cols-[1fr_1.4fr_1.4fr] text-sm">
             <div className="px-4 md:px-6 py-4 bg-parchment/60 font-label text-[10px] tracking-[0.18em] uppercase text-ink/45 flex items-end">
               What&apos;s inside

@@ -90,7 +90,7 @@ export default function BundlesSection() {
     <section className="relative bg-[#EFE6D3] py-16 md:py-20 overflow-hidden">
       <div className="pointer-events-none absolute inset-0 grain-overlay opacity-[0.05] mix-blend-multiply" aria-hidden="true" />
       <div className="relative max-w-7xl mx-auto px-4 md:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-10 md:mb-12">
+        <div className="text-center max-w-2xl mx-auto mb-10 md:mb-12" data-reveal>
           <p className="font-label text-[10px] tracking-[0.24em] uppercase text-clay mb-3">Boxes that ship free</p>
           <h2 className="font-display italic text-4xl md:text-5xl text-ink leading-none">Pick a box, skip the thinking.</h2>
           <p className="mt-4 text-[15px] text-ink/55">
@@ -99,11 +99,11 @@ export default function BundlesSection() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
-          {boxes.map((box) => {
+          {boxes.map((box, i) => {
             const freeShip = box.total >= threshold;
             const isAdded = added === box.key;
             return (
-              <article key={box.key} className="group relative flex flex-col rounded-[24px] bg-white ring-1 ring-ink/[0.08] p-5 md:p-6 shadow-[0_24px_60px_-40px_rgba(36,31,22,0.5)] transition hover:-translate-y-1">
+              <article key={box.key} data-reveal data-reveal-delay={String(i * 110)} className="group relative flex flex-col rounded-[24px] bg-white ring-1 ring-ink/[0.08] p-5 md:p-6 shadow-[0_24px_60px_-40px_rgba(36,31,22,0.5)] transition hover:-translate-y-1">
                 <span className="absolute top-4 right-4 rounded-full bg-ink text-parchment font-label text-[9px] tracking-[0.16em] uppercase px-2.5 py-1">
                   {box.badge}
                 </span>

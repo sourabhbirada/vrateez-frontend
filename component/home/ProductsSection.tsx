@@ -109,7 +109,7 @@ export default function ProductsSection() {
     <section className="py-16 bg-parchment" id="products">
       <div className="max-w-7xl mx-auto px-8">
         <p className="font-label text-[10px] tracking-[0.24em] uppercase text-clay text-center mb-3">The range</p>
-        <h2 className="font-display italic text-4xl md:text-5xl text-center text-ink mb-4">Our Products</h2>
+        <h2 className="font-display italic text-4xl md:text-5xl text-center text-ink mb-4" data-reveal>Our Products</h2>
         <p className="text-center text-ink/55 mb-10 max-w-2xl mx-auto text-[15px] leading-relaxed">
           High-protein cookies, energy bars &amp; superfood snacks — all crafted with real ingredients and zero added
           sugar.

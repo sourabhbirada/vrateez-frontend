@@ -119,7 +119,7 @@ export default function ProductCard<T extends ProductCardData>({ product, onAdd,
           <button
             type="button"
             onClick={handleAdd}
-            className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition-colors ${
+            className={`pressable inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition-colors ${
               added ? 'bg-basil text-parchment' : 'bg-ink text-parchment hover:bg-turmeric'
             }`}
           >

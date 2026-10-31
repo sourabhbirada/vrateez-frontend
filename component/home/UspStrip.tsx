@@ -20,8 +20,8 @@ export default function UspStrip() {
   return (
     <section aria-label="Why shop with Vrateez" className="bg-ink text-parchment border-y border-parchment/10">
       <ul className="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-x divide-y lg:divide-y-0 divide-parchment/10">
-        {items.map(({ icon: Icon, title, sub }) => (
-          <li key={title} className="flex items-center gap-3 px-4 py-4 lg:px-5 lg:py-5">
+        {items.map(({ icon: Icon, title, sub }, i) => (
+          <li key={title} className="flex items-center gap-3 px-4 py-4 lg:px-5 lg:py-5" data-reveal data-reveal-delay={String(i * 70)}>
             <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-millet/15 text-millet">
               <Icon size={16} strokeWidth={1.75} />
             </span>

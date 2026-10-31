@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import HomePageClient from './HomePageClient';
+import { DEFAULT_FAQS, faqPageSchema } from '@/lib/seoFaqs';
 
 export const metadata: Metadata = {
   title: "Buy Vrat Food, Healthy Protein Cookies & Fasting Snacks Online in India",
@@ -30,5 +31,10 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  return <HomePageClient />;
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageSchema(DEFAULT_FAQS)) }} />
+      <HomePageClient />
+    </>
+  );
 }

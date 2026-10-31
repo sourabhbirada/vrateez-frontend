@@ -1,6 +1,5 @@
 'use client';
 
-import type { Metadata } from 'next';
 import ProductCard from '@/component/product/ProductCard';
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -11,8 +10,7 @@ import { getCategoriesApi } from '@/lib/api/categoryApi';
 import type { Product as ApiProduct, ProductCategory } from '@/lib/api/types';
 import { normalizeProductCategory } from '@/lib/api/types';
 
-// Note: This is a client component, so metadata needs to be set via generateMetadata in a server component wrapper
-// For now, we'll handle SEO through document title manipulation
+// Metadata for this route lives in app/shop/layout.tsx (this file is a client component).
 
 interface ShopProduct {
     id: string | number;

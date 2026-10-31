@@ -10,6 +10,7 @@ import WhatsAppButton from '../component/ui/WhatsAppButton';
 import CookieConsent from '../component/common/CookieConsent';
 import ActivityTracker from '../component/common/ActivityTracker';
 import Analytics from '../component/common/Analytics';
+import ScrollReveal from '../component/common/ScrollReveal';
 import { CartProvider } from '../context/CartContext';
 import { AuthProvider } from '../context/AuthContext';
 import { SettingsProvider } from '../context/SettingsContext';
@@ -74,7 +75,7 @@ const plexMono = IBM_Plex_Mono({
  */
 
 const SITE_NAME = "Vrateez";
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vrateez.com";
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.vrateez.in").replace(/\/$/, "");
 const SITE_DESCRIPTION = "Buy vrat-friendly healthy protein cookies, energy bars & fasting snacks online in India. Perfect for vrat/upvas - made with millet, nuts & seeds. Zero added sugar, high protein, FSSAI certified. Free delivery on orders above ₹499.";
 
 export const metadata: Metadata = {
@@ -290,6 +291,7 @@ export default function RootLayout({
             <CartProvider>
               <ActivityTracker />
               <Analytics />
+              <ScrollReveal />
               <AnnouncementBar />
               <Header />
               {children}

@@ -7,6 +7,7 @@ import { ArrowRight, Flame, ShieldCheck, Sprout, Star, Truck, Wheat } from 'luci
 import { useSettings } from '@/context/SettingsContext';
 import { getProductsApi } from '@/lib/api/productApi';
 import type { Product } from '@/lib/api/types';
+import CountUp from '@/component/common/CountUp';
 
 const PROOF = [
   { value: '10g', label: 'protein per serving', sub: 'From millets, nuts and seeds. No powders.' },
@@ -73,7 +74,7 @@ export default function WhyVrateezSection() {
       <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-16 items-center">
           {/* Copy */}
-          <div>
+          <div data-reveal>
             <p className="font-label text-[10px] tracking-[0.24em] uppercase text-clay mb-4">Why Vrateez</p>
             <h2 className="font-display italic text-4xl md:text-[3.4rem] leading-[1.02] tracking-[-0.015em] text-ink">
               The snack you don&apos;t have to feel guilty about.
@@ -86,7 +87,7 @@ export default function WhyVrateezSection() {
             <dl className="mt-8 grid grid-cols-3 gap-3 md:gap-4">
               {PROOF.map((p) => (
                 <div key={p.label} className="rounded-2xl bg-ink text-parchment px-4 py-4 md:px-5 md:py-5 ring-1 ring-ink/10">
-                  <dt className="font-display text-3xl md:text-4xl text-millet leading-none">{p.value}</dt>
+                  <dt className="font-display text-3xl md:text-4xl text-millet leading-none"><CountUp value={p.value} /></dt>
                   <dd className="mt-1.5 text-[12px] md:text-[13px] font-semibold leading-snug">{p.label}</dd>
                   <dd className="mt-1 hidden md:block text-[11px] text-parchment/50 leading-snug">{p.sub}</dd>
                 </div>
@@ -110,7 +111,7 @@ export default function WhyVrateezSection() {
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <Link
                 href="/shop"
-                className="group inline-flex items-center gap-2 rounded-full bg-turmeric px-7 py-3.5 text-sm font-semibold text-parchment shadow-lg shadow-turmeric/25 transition hover:bg-clay"
+                className="group pressable inline-flex items-center gap-2 rounded-full bg-turmeric px-7 py-3.5 text-sm font-semibold text-parchment shadow-lg shadow-turmeric/25 transition hover:bg-clay"
               >
                 Shop bestsellers
                 <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
@@ -122,7 +123,7 @@ export default function WhyVrateezSection() {
           </div>
 
           {/* Collage */}
-          <div className="relative mx-auto w-full max-w-[520px] aspect-[4/5] lg:aspect-[5/6]">
+          <div className="relative mx-auto w-full max-w-[520px] aspect-[4/5] lg:aspect-[5/6]" data-reveal data-reveal-delay="160">
             <div className="absolute inset-x-6 top-0 bottom-16 rounded-[32px] overflow-hidden ring-1 ring-ink/10 shadow-[0_40px_90px_-40px_rgba(36,31,22,0.6)]">
               <Image
                 src="/virteez/All three infused cookies.jpeg"

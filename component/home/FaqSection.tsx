@@ -6,35 +6,8 @@ import { ChevronDown, MessageCircle } from 'lucide-react';
 import { useSettings } from '@/context/SettingsContext';
 import { getFaqsApi } from '@/lib/api/faqApi';
 import type { Faq } from '@/lib/api/types';
+import { DEFAULT_FAQS } from '@/lib/seoFaqs';
 
-const DEFAULT_FAQS: Array<Pick<Faq, 'question' | 'answer'>> = [
-  {
-    question: 'Are Vrateez snacks really vrat friendly?',
-    answer:
-      'Yes. Everything is made without onion, garlic or grains like wheat and rice, using millets, nuts, seeds and fruit. Check each product page for the exact ingredient list.',
-  },
-  {
-    question: 'How much sugar is in the cookies?',
-    answer: 'Zero added sugar. Sweetness comes from the fruit, dates and nuts themselves.',
-  },
-  {
-    question: 'Do you deliver everywhere in India?',
-    answer:
-      'Yes, we ship pan-India. Orders are packed fresh within 24 to 48 hours and you get a WhatsApp and email with the tracking number as soon as the courier picks it up.',
-  },
-  {
-    question: 'Can I pay on delivery?',
-    answer: 'Yes. Choose Cash on Delivery at checkout, or pay online by UPI, card or net banking through Razorpay.',
-  },
-  {
-    question: 'How do I track my order?',
-    answer: 'Open the Track Order page and enter your order ID or the courier tracking number. Live scan updates come straight from the courier.',
-  },
-  {
-    question: 'Do you do corporate or festive gifting?',
-    answer: 'Yes. Use the Bulk Order page for custom hampers, branded packaging and volume pricing. We reply within one working day.',
-  },
-];
 
 export default function FaqSection() {
   const { settings } = useSettings();
@@ -59,7 +32,7 @@ export default function FaqSection() {
   return (
     <section className="bg-parchment py-16 md:py-20" id="faq">
       <div className="max-w-6xl mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-[0.8fr_1.2fr] gap-10 lg:gap-16 items-start">
-        <div className="lg:sticky lg:top-28">
+        <div className="lg:sticky lg:top-28" data-reveal>
           <p className="font-label text-[10px] tracking-[0.24em] uppercase text-clay mb-3">Before you order</p>
           <h2 className="font-display italic text-4xl md:text-5xl text-ink leading-none">Questions, answered.</h2>
           <p className="mt-4 text-[15px] text-ink/55 max-w-sm">
@@ -80,7 +53,7 @@ export default function FaqSection() {
           </div>
         </div>
 
-        <ul className="divide-y divide-ink/[0.08] rounded-[24px] bg-white ring-1 ring-ink/[0.08] overflow-hidden">
+        <ul className="divide-y divide-ink/[0.08] rounded-[24px] bg-white ring-1 ring-ink/[0.08] overflow-hidden" data-reveal data-reveal-delay="120">
           {faqs.map((f, i) => {
             const isOpen = open === i;
             return (
