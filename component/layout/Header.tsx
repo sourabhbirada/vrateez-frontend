@@ -2,44 +2,74 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, User, Search, Menu, X, LogOut, Package, MapPin } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { ShoppingCart, User, Search, Menu, X, LogOut, Package, MessageCircle, ArrowUpRight } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSettings, whatsappLink } from '@/context/SettingsContext';
+import { useState, useRef, useEffect, useCallback, useSyncExternalStore } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import SearchModal from '@/component/search/SearchModal';
+
+const noopSubscribe = () => () => {};
+const subscribeScroll = (onChange: () => void) => {
+    window.addEventListener('scroll', onChange, { passive: true });
+    return () => window.removeEventListener('scroll', onChange);
+};
+
+const NAV_LINKS = [
+    { href: '/shop', label: 'Shop' },
+    { href: '/track-order', label: 'Track order' },
+    { href: '/bulk-order', label: 'Bulk order' },
+    { href: '/faq', label: 'FAQ' },
+    { href: '/about-us', label: 'About' },
+];
+
+const FALLBACK_WHATSAPP = '916375010189';
 
 export default function Header() {
-    const { totalItems, toggleCart } = useCart();
+    const { totalItems, toggleCart, hydrated } = useCart();
     const { user, openLogin, logout } = useAuth();
+    const { settings } = useSettings();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchOpen, setSearchOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
-    const [mounted, setMounted] = useState(false);
+    const [badgePop, setBadgePop] = useState(false);
     const userMenuRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
+    const pathname = usePathname();
 
-    // Handle mounting
+    // Client-only flags: false during SSR and hydration, live values afterwards
+    const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
+    const scrolled = useSyncExternalStore(subscribeScroll, () => window.scrollY > 50, () => false);
+
+    // Close menus on route change (state adjusted during render, see "storing information from previous renders")
+    const [prevPathname, setPrevPathname] = useState(pathname);
+    if (pathname !== prevPathname) {
+        setPrevPathname(pathname);
+        setMobileOpen(false);
+        setUserMenuOpen(false);
+    }
+
+    // Pop the cart badge when the count changes, but not on the initial cart hydration
+    const [prevTotal, setPrevTotal] = useState(totalItems);
+    const [prevHydrated, setPrevHydrated] = useState(hydrated);
+    if (hydrated !== prevHydrated) {
+        setPrevHydrated(hydrated);
+        setPrevTotal(totalItems);
+    } else if (totalItems !== prevTotal) {
+        setPrevTotal(totalItems);
+        if (hydrated && totalItems > 0) setBadgePop(true);
+    }
     useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    // Handle scroll effect
-    useEffect(() => {
-        if (!mounted) return;
-
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 50);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [mounted]);
+        if (!badgePop) return;
+        const t = window.setTimeout(() => setBadgePop(false), 320);
+        return () => window.clearTimeout(t);
+    }, [badgePop]);
 
     // Close user menu on outside click
     useEffect(() => {
-        if (!mounted) return;
-
         const handler = (e: MouseEvent) => {
             if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
                 setUserMenuOpen(false);
@@ -47,7 +77,24 @@ export default function Header() {
         };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
-    }, [mounted]);
+    }, []);
+
+    // Lock body scroll + Escape to close while the mobile menu is open
+    useEffect(() => {
+        if (!mobileOpen) return;
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setMobileOpen(false);
+        };
+        window.addEventListener('keydown', onKey);
+        return () => {
+            document.body.style.overflow = prev;
+            window.removeEventListener('keydown', onKey);
+        };
+    }, [mobileOpen]);
+
+    const closeSearch = useCallback(() => setSearchOpen(false), []);
 
     const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -59,13 +106,23 @@ export default function Header() {
         }
     };
 
-    // Logo sits on a dark ink plate so the gold mark stays readable on parchment header.
-    const Logo = ({ scrolled }: { scrolled: boolean }) => (
+    const isActive = (href: string) => pathname === href || (href !== '/' && pathname.startsWith(`${href}/`));
+
+    // Values that depend on client-only state render neutral until mounted (hydration safety)
+    const currentUser = mounted ? user : null;
+    const count = mounted ? totalItems : 0;
+    const compact = scrolled;
+
+    const whatsappHref =
+        whatsappLink(settings?.contact?.whatsapp) ||
+        whatsappLink(FALLBACK_WHATSAPP) ||
+        `https://wa.me/${FALLBACK_WHATSAPP}`;
+
+    // Logo sits on a dark ink plate so the gold mark stays readable on the parchment header.
+    const logo = (
         <div
             className={`relative overflow-hidden rounded-xl bg-ink ring-1 ring-ink/40 shadow-sm transition-all duration-300 ${
-                scrolled
-                    ? 'h-11 w-[118px] p-1'
-                    : 'h-14 w-[158px] p-1.5 md:h-[72px] md:w-[196px]'
+                compact ? 'h-10 w-[108px] p-1' : 'h-12 w-[136px] p-1.5 md:h-16 md:w-[176px]'
             }`}
         >
             <div className="relative h-full w-full">
@@ -74,209 +131,329 @@ export default function Header() {
                     alt="Vrateez — nourish your fasting"
                     fill
                     className="object-contain"
-                    sizes="(min-width: 768px) 196px, 158px"
+                    sizes="(min-width: 768px) 176px, 136px"
                     priority
                 />
             </div>
         </div>
     );
 
-    // Prevent hydration mismatch
-    if (!mounted) {
-        return (
-            <header className="bg-[#E8DCC8]/95 backdrop-blur-md sticky top-0 z-30 border-b border-black/5 py-4">
-                <div className="max-w-7xl mx-auto px-4 md:px-6">
-                    <div className="flex items-center justify-between gap-4">
-                        <nav className="hidden md:flex items-center gap-1 flex-1" />
-                        <Link href="/" className="flex-shrink-0">
-                            <Logo scrolled={false} />
+    const iconButton =
+        'relative inline-flex h-10 w-10 items-center justify-center rounded-full text-ink transition hover:bg-ink/[0.06] focus:outline-none focus-visible:ring-2 focus-visible:ring-turmeric/40';
+
+    const mobileMenu = (
+        <div
+            className={`fixed inset-0 z-50 transition-[visibility] duration-300 md:hidden ${
+                mobileOpen ? 'visible' : 'pointer-events-none invisible'
+            }`}
+            aria-hidden={!mobileOpen}
+        >
+            {/* Overlay */}
+            <div
+                className={`absolute inset-0 bg-ink/50 backdrop-blur-[2px] transition-opacity duration-300 ${
+                    mobileOpen ? 'opacity-100' : 'opacity-0'
+                }`}
+                onClick={() => setMobileOpen(false)}
+            />
+
+            {/* Panel */}
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-label="Menu"
+                className={`absolute inset-y-0 left-0 flex w-[88%] max-w-sm flex-col bg-parchment text-ink shadow-2xl transition-transform duration-300 ease-out ${
+                    mobileOpen ? 'translate-x-0' : '-translate-x-full'
+                }`}
+            >
+                <div className="flex items-center justify-between px-5 pt-4 pb-3">
+                    <p className="font-label text-[10px] tracking-[0.22em] uppercase text-clay">Menu</p>
+                    <button
+                        type="button"
+                        onClick={() => setMobileOpen(false)}
+                        className={iconButton}
+                        aria-label="Close menu"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto px-5 pb-6">
+                    {/* Mobile Search */}
+                    <form onSubmit={handleSearch} role="search">
+                        <label htmlFor="mobile-nav-search" className="sr-only">
+                            Search products
+                        </label>
+                        <div className="relative">
+                            <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/35" />
+                            <input
+                                id="mobile-nav-search"
+                                type="search"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search cookies, bars, millet…"
+                                className="w-full rounded-xl border border-ink/12 bg-white py-3.5 pl-11 pr-4 text-sm text-ink placeholder:text-ink/30 focus:border-turmeric focus:outline-none focus:ring-2 focus:ring-turmeric/30"
+                            />
+                        </div>
+                    </form>
+
+                    <nav className="mt-6 flex flex-col" aria-label="Mobile">
+                        {NAV_LINKS.map((item) => {
+                            const active = isActive(item.href);
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    onClick={() => setMobileOpen(false)}
+                                    aria-current={active ? 'page' : undefined}
+                                    className="group flex items-center justify-between border-b border-ink/[0.08] py-3.5"
+                                >
+                                    <span
+                                        className={`font-display italic text-[1.9rem] leading-none tracking-[-0.01em] transition-colors ${
+                                            active ? 'text-turmeric' : 'text-ink group-hover:text-clay'
+                                        }`}
+                                    >
+                                        {item.label}
+                                    </span>
+                                    <ArrowUpRight
+                                        size={18}
+                                        className={`transition ${active ? 'text-turmeric' : 'text-ink/25 group-hover:text-clay'}`}
+                                    />
+                                </Link>
+                            );
+                        })}
+                    </nav>
+
+                    {/* Account row */}
+                    <div className="mt-6 rounded-[22px] bg-white p-4 ring-1 ring-ink/[0.08]">
+                        {currentUser ? (
+                            <>
+                                <div className="flex items-center gap-3">
+                                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-turmeric text-sm font-bold text-parchment">
+                                        {currentUser.name[0]?.toUpperCase()}
+                                    </span>
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-semibold text-ink">{currentUser.name}</p>
+                                        <p className="truncate text-xs text-ink/45">{currentUser.email}</p>
+                                    </div>
+                                </div>
+                                <div className="mt-4 grid grid-cols-2 gap-2">
+                                    <Link
+                                        href="/account/orders"
+                                        onClick={() => setMobileOpen(false)}
+                                        className="inline-flex items-center justify-center gap-1.5 rounded-full bg-ink px-4 py-2.5 text-xs font-semibold text-parchment transition hover:bg-turmeric"
+                                    >
+                                        <Package size={14} />
+                                        My orders
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            logout();
+                                            setMobileOpen(false);
+                                        }}
+                                        className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-semibold text-clay ring-1 ring-clay/25 transition hover:bg-clay/10"
+                                    >
+                                        <LogOut size={14} />
+                                        Log out
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="flex items-center justify-between gap-3">
+                                <div>
+                                    <p className="text-sm font-semibold text-ink">Your account</p>
+                                    <p className="text-xs text-ink/45">Track orders and check out faster.</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setMobileOpen(false);
+                                        openLogin();
+                                    }}
+                                    className="pressable inline-flex shrink-0 items-center gap-1.5 rounded-full bg-turmeric px-4 py-2.5 text-xs font-semibold text-parchment shadow-lg shadow-turmeric/25 transition hover:bg-clay"
+                                >
+                                    <User size={14} />
+                                    Log in
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* WhatsApp row */}
+                    <a
+                        href={whatsappHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 flex items-center gap-3 rounded-[22px] bg-basil px-4 py-3.5 text-parchment transition hover:bg-basil/90"
+                    >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#25D366] text-white">
+                            <MessageCircle size={16} fill="currentColor" />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold leading-tight">Chat with us on WhatsApp</span>
+                            <span className="block text-[11px] text-parchment/60">Orders, bulk pricing, vrat questions</span>
+                        </span>
+                        <ArrowUpRight size={16} className="text-parchment/60" />
+                    </a>
+                </div>
+            </div>
+        </div>
+    );
+
+    return (
+        <>
+            <header
+                className={`sticky top-0 z-30 border-b transition-all duration-300 ${
+                    compact
+                        ? 'border-ink/[0.08] bg-parchment/90 py-2 shadow-[0_1px_0_rgba(36,31,22,0.04)] backdrop-blur-md'
+                        : 'border-transparent bg-parchment py-3 md:py-3.5'
+                }`}
+            >
+                <div className="mx-auto max-w-7xl px-4 md:px-6">
+                    <div className="flex items-center justify-between gap-3">
+                        {/* Left: Nav links (desktop) */}
+                        <nav className="hidden flex-1 items-center gap-1 md:flex" aria-label="Primary">
+                            {NAV_LINKS.map((item) => {
+                                const active = isActive(item.href);
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        aria-current={active ? 'page' : undefined}
+                                        className={`group relative whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-turmeric/40 ${
+                                            active ? 'text-ink' : 'text-ink/70 hover:text-ink'
+                                        }`}
+                                    >
+                                        {item.label}
+                                        <span
+                                            aria-hidden="true"
+                                            className={`absolute left-3 right-3 bottom-0.5 h-[2px] origin-left rounded-full bg-turmeric transition-transform duration-300 ease-out ${
+                                                active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                                            }`}
+                                        />
+                                    </Link>
+                                );
+                            })}
+                        </nav>
+
+                        {/* Mobile: menu button */}
+                        <div className="flex flex-1 items-center md:hidden">
+                            <button
+                                type="button"
+                                className={iconButton}
+                                onClick={() => setMobileOpen(true)}
+                                aria-label="Open menu"
+                                aria-expanded={mobileOpen}
+                            >
+                                <Menu size={22} strokeWidth={1.75} />
+                            </button>
+                        </div>
+
+                        {/* Center: Logo */}
+                        <Link href="/" className="flex-shrink-0 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-turmeric/40" aria-label="Vrateez home">
+                            {logo}
                         </Link>
-                        <div className="flex items-center gap-1 flex-1 justify-end" />
+
+                        {/* Right: Search + User + Cart */}
+                        <div className="flex flex-1 items-center justify-end gap-0.5 sm:gap-1">
+                            <button
+                                type="button"
+                                onClick={() => setSearchOpen(true)}
+                                className={iconButton}
+                                aria-label="Search products"
+                            >
+                                <Search size={19} strokeWidth={1.75} />
+                            </button>
+
+                            {/* User / Auth */}
+                            <div className="relative" ref={userMenuRef}>
+                                {currentUser ? (
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={() => setUserMenuOpen(!userMenuOpen)}
+                                            className={iconButton}
+                                            aria-label="Account menu"
+                                            aria-haspopup="menu"
+                                            aria-expanded={userMenuOpen}
+                                        >
+                                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-turmeric text-xs font-bold text-parchment ring-2 ring-parchment">
+                                                {currentUser.name[0]?.toUpperCase()}
+                                            </span>
+                                        </button>
+                                        {userMenuOpen && (
+                                            <div
+                                                role="menu"
+                                                className="absolute right-0 z-50 mt-2 w-60 overflow-hidden rounded-2xl bg-white ring-1 ring-ink/[0.08] shadow-[0_24px_50px_-24px_rgba(36,31,22,0.45)] animate-fadeIn"
+                                            >
+                                                <div className="border-b border-ink/[0.08] px-4 py-3">
+                                                    <p className="font-label text-[10px] tracking-[0.22em] uppercase text-clay">Signed in</p>
+                                                    <p className="mt-1 truncate text-sm font-semibold text-ink">{currentUser.name}</p>
+                                                    <p className="truncate text-xs text-ink/45">{currentUser.email}</p>
+                                                </div>
+                                                <Link
+                                                    href="/account/orders"
+                                                    role="menuitem"
+                                                    onClick={() => setUserMenuOpen(false)}
+                                                    className="flex w-full items-center gap-2.5 px-4 py-3 text-sm text-ink transition hover:bg-parchment/70"
+                                                >
+                                                    <Package size={15} className="text-turmeric" />
+                                                    My orders
+                                                </Link>
+                                                <button
+                                                    type="button"
+                                                    role="menuitem"
+                                                    onClick={() => {
+                                                        logout();
+                                                        setUserMenuOpen(false);
+                                                    }}
+                                                    className="flex w-full items-center gap-2.5 border-t border-ink/[0.08] px-4 py-3 text-sm text-clay transition hover:bg-clay/[0.06]"
+                                                >
+                                                    <LogOut size={15} />
+                                                    Log out
+                                                </button>
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={openLogin}
+                                        className={iconButton}
+                                        aria-label="Log in"
+                                    >
+                                        <User size={19} strokeWidth={1.75} />
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Cart */}
+                            <button
+                                type="button"
+                                onClick={toggleCart}
+                                className={iconButton}
+                                aria-label={count > 0 ? `Open cart, ${count} item${count === 1 ? '' : 's'}` : 'Open cart'}
+                            >
+                                <ShoppingCart size={19} strokeWidth={1.75} />
+                                {count > 0 && (
+                                    <span
+                                        className={`absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-millet px-1 text-[10px] font-bold leading-none text-ink ring-2 ring-parchment transition-transform duration-300 ease-out ${
+                                            badgePop ? 'scale-[1.35]' : 'scale-100'
+                                        }`}
+                                        aria-hidden="true"
+                                    >
+                                        {count > 99 ? '99+' : count}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>
-        );
-    }
 
-    return (
-        <header className={`bg-[#E8DCC8]/95 backdrop-blur-md sticky top-0 z-30 border-b border-black/5 transition-all duration-300 ${scrolled ? 'py-2.5' : 'py-4'}`}>
-            <div className="max-w-7xl mx-auto px-4 md:px-6">
-                <div className="flex items-center justify-between gap-4">
-                    {/* Left: Nav links */}
-                    <nav className="hidden md:flex items-center gap-1 flex-1">
-                        <Link href="/shop" className="text-gray-800 font-medium text-sm px-3 py-2 rounded-md hover:bg-black/5 transition whitespace-nowrap">
-                            Shop
-                        </Link>
-                        <Link href="/track-order" className="text-gray-800 font-medium text-sm px-3 py-2 rounded-md hover:bg-black/5 transition whitespace-nowrap flex items-center gap-1.5">
-                            <MapPin size={14} />
-                            Track Order
-                        </Link>
-                        <Link href="/bulk-order" className="text-gray-800 font-medium text-sm px-3 py-2 rounded-md hover:bg-black/5 transition whitespace-nowrap">
-                            Bulk Order
-                        </Link>
-                        <Link href="/faq" className="text-gray-800 font-medium text-sm px-3 py-2 rounded-md hover:bg-black/5 transition whitespace-nowrap">
-                            FAQ
-                        </Link>
-                        <Link href="/about-us" className="text-gray-800 font-medium text-sm px-3 py-2 rounded-md hover:bg-black/5 transition whitespace-nowrap">
-                            About
-                        </Link>
-                    </nav>
-
-                    {/* Mobile menu button */}
-                    <button
-                        className="md:hidden p-2 hover:bg-black/5 rounded-md transition"
-                        onClick={() => setMobileOpen(!mobileOpen)}
-                        aria-label="Toggle menu"
-                    >
-                        {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-                    </button>
-
-                    {/* Center: Logo */}
-                    <Link href="/" className="flex-shrink-0">
-                        <Logo scrolled={scrolled} />
-                    </Link>
-
-                    {/* Right: Search + User + Cart */}
-                    <div className="flex items-center gap-1 flex-1 justify-end">
-                        {/* Search - Desktop */}
-                        {!searchOpen ? (
-                            <button
-                                onClick={() => setSearchOpen(true)}
-                                className="hidden md:flex p-2 hover:bg-black/5 rounded-md transition"
-                                aria-label="Search"
-                            >
-                                <Search size={18} />
-                            </button>
-                        ) : (
-                            <form onSubmit={handleSearch} className="hidden md:flex items-center">
-                                <div className="relative">
-                                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        onBlur={() => setTimeout(() => !searchQuery && setSearchOpen(false), 200)}
-                                        placeholder="Search..."
-                                        autoFocus
-                                        className="w-56 pl-9 pr-3 py-2 text-sm bg-white border border-black/10 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all placeholder:text-gray-400"
-                                    />
-                                </div>
-                            </form>
-                        )}
-
-                        {/* Search - Mobile */}
-                        <button
-                            onClick={() => setMobileOpen(true)}
-                            className="p-2 hover:bg-black/5 rounded-md transition md:hidden"
-                            aria-label="Search"
-                        >
-                            <Search size={18} />
-                        </button>
-
-                        {/* User / Auth */}
-                        <div className="relative" ref={userMenuRef}>
-                            {user ? (
-                                <>
-                                    <button
-                                        onClick={() => setUserMenuOpen(!userMenuOpen)}
-                                        className="flex items-center p-2 hover:bg-black/5 rounded-md transition"
-                                    >
-                                        <div className="w-7 h-7 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                                            {user.name[0].toUpperCase()}
-                                        </div>
-                                    </button>
-                                    {userMenuOpen && (
-                                        <div className="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden z-50">
-                                            <div className="px-3 py-2.5 border-b border-gray-100">
-                                                <p className="text-xs font-bold text-gray-900 truncate">{user.name}</p>
-                                                <p className="text-[10px] text-gray-500 truncate">{user.email}</p>
-                                            </div>
-                                            <Link
-                                                href="/account/orders"
-                                                onClick={() => setUserMenuOpen(false)}
-                                                className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-800 hover:bg-gray-50 transition border-b border-gray-100"
-                                            >
-                                                <Package size={14} />
-                                                My orders
-                                            </Link>
-                                            <button
-                                                onClick={() => { logout(); setUserMenuOpen(false); }}
-                                                className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-red-600 hover:bg-red-50 transition"
-                                            >
-                                                <LogOut size={14} />
-                                                Logout
-                                            </button>
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                <button
-                                    onClick={openLogin}
-                                    className="p-2 hover:bg-black/5 rounded-md transition"
-                                    aria-label="Login"
-                                >
-                                    <User size={18} />
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Cart */}
-                        <button
-                            onClick={toggleCart}
-                            className="relative p-2 hover:bg-black/5 rounded-md transition"
-                            aria-label="Shopping Cart"
-                        >
-                            <ShoppingCart size={18} />
-                            {totalItems > 0 && (
-                                <span className="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
-                                    {totalItems}
-                                </span>
-                            )}
-                        </button>
-                    </div>
-                </div>
-
-                {/* Mobile nav */}
-                {mobileOpen && (
-                    <nav className="md:hidden pt-3 pb-2 flex flex-col gap-0.5 border-t border-black/5 mt-2.5">
-                        {/* Mobile Search */}
-                        <form onSubmit={handleSearch} className="mb-1.5">
-                            <div className="relative">
-                                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search products..."
-                                    className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-black/10 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500/40 focus:border-orange-500 transition-all placeholder:text-gray-400"
-                                />
-                            </div>
-                        </form>
-
-                        <Link href="/shop" onClick={() => setMobileOpen(false)} className="text-gray-800 font-medium text-sm py-2 px-2.5 rounded-md hover:bg-black/5 transition">
-                            Shop
-                        </Link>
-                        <Link href="/track-order" onClick={() => setMobileOpen(false)} className="text-gray-800 font-medium text-sm py-2 px-2.5 rounded-md hover:bg-black/5 transition flex items-center gap-1.5">
-                            <MapPin size={14} />
-                            Track Order
-                        </Link>
-                        <Link href="/bulk-order" onClick={() => setMobileOpen(false)} className="text-gray-800 font-medium text-sm py-2 px-2.5 rounded-md hover:bg-black/5 transition">
-                            Bulk Order
-                        </Link>
-                        <Link href="/faq" onClick={() => setMobileOpen(false)} className="text-gray-800 font-medium text-sm py-2 px-2.5 rounded-md hover:bg-black/5 transition">
-                            FAQ
-                        </Link>
-                        <Link href="/about-us" onClick={() => setMobileOpen(false)} className="text-gray-800 font-medium text-sm py-2 px-2.5 rounded-md hover:bg-black/5 transition">
-                            About Us
-                        </Link>
-                        {user && (
-                            <Link href="/account/orders" onClick={() => setMobileOpen(false)} className="text-gray-800 font-medium text-sm py-2 px-2.5 rounded-md hover:bg-black/5 transition">
-                                My Orders
-                            </Link>
-                        )}
-                    </nav>
-                )}
-            </div>
-        </header>
+            {/* Portaled overlays so they escape the sticky header's stacking context */}
+            {mounted && createPortal(mobileMenu, document.body)}
+            {mounted && createPortal(<SearchModal isOpen={searchOpen} onClose={closeSearch} />, document.body)}
+        </>
     );
 }

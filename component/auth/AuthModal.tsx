@@ -1,7 +1,12 @@
 'use client';
-import { useState } from 'react';
-import { X, Eye, EyeOff, Mail, Lock, UserIcon, Phone } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { X, Eye, EyeOff, Mail, Lock, UserIcon, Phone, Loader2, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+
+const inputClass =
+    'w-full rounded-xl border border-ink/12 bg-white py-3.5 text-sm text-ink placeholder:text-ink/30 transition focus:border-turmeric focus:outline-none focus:ring-2 focus:ring-turmeric/30';
+const labelClass = 'block font-label text-[10px] tracking-[0.22em] uppercase text-ink/55';
+const iconClass = 'pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/35';
 
 export default function AuthModal() {
     const {
@@ -26,6 +31,21 @@ export default function AuthModal() {
     const [phone, setPhone] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [otp, setOtp] = useState('');
+
+    // Escape closes the modal; the page behind stops scrolling while it is open
+    useEffect(() => {
+        if (!isLoginOpen) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') closeAuth();
+        };
+        window.addEventListener('keydown', onKey);
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            window.removeEventListener('keydown', onKey);
+            document.body.style.overflow = prev;
+        };
+    }, [isLoginOpen, closeAuth]);
 
     if (!isLoginOpen) return null;
 
@@ -62,188 +82,259 @@ export default function AuthModal() {
         setPhone('');
     };
 
+    const eyebrow = pendingEmailOtp ? 'One more step' : isSignup ? 'New here' : 'Welcome back';
+    const headline = pendingEmailOtp
+        ? 'Verify your email.'
+        : isSignup
+            ? 'Create your account.'
+            : 'Good to see you again.';
+    const subcopy = pendingEmailOtp
+        ? 'Enter the 6-digit code we sent to your inbox.'
+        : isSignup
+            ? 'Faster checkout, order tracking and first dibs on new launches.'
+            : 'Log in to track orders and check out faster.';
+    const ctaLabel = isLoading
+        ? 'Please wait…'
+        : pendingEmailOtp
+            ? 'Verify code'
+            : isSignup
+                ? 'Create account'
+                : 'Log in';
+
     return (
         <>
             {/* Overlay */}
-            <div className="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm" onClick={closeAuth} />
+            <div className="fixed inset-0 z-50 bg-ink/50 backdrop-blur-[2px]" onClick={closeAuth} />
 
             {/* Modal */}
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="auth-modal-title"
+                    className="pointer-events-auto flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-t-[26px] bg-parchment text-ink ring-1 ring-ink/[0.08] shadow-[0_32px_80px_-24px_rgba(36,31,22,0.55)] animate-slideUp sm:rounded-[26px]"
+                    onClick={e => e.stopPropagation()}
+                >
                     {/* Header */}
-                    <div className="relative bg-linear-to-br from-amber-50 to-orange-100 px-8 pt-8 pb-6">
+                    <div className="relative px-7 pt-7 pb-5">
+                        <div
+                            className="pointer-events-none absolute -top-16 -right-16 h-44 w-44 rounded-full opacity-60 blur-3xl"
+                            aria-hidden="true"
+                            style={{ background: 'radial-gradient(circle, rgba(228,169,61,0.6) 0%, transparent 65%)' }}
+                        />
                         <button
+                            type="button"
                             onClick={closeAuth}
-                            className="absolute top-4 right-4 p-1 hover:bg-black/10 rounded-full transition"
+                            className="absolute top-4 right-4 inline-flex h-9 w-9 items-center justify-center rounded-full text-ink/60 transition hover:bg-ink/[0.06] hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-turmeric/40"
+                            aria-label="Close"
                         >
-                            <X size={20} />
+                            <X size={18} />
                         </button>
-                        <h2 className="text-2xl font-extrabold text-gray-900">
-                            {pendingEmailOtp
-                                ? 'Verify your email'
-                                : isSignup
-                                    ? 'Create Account'
-                                    : 'Welcome Back'}
+                        <p className="font-label text-[10px] tracking-[0.22em] uppercase text-clay">{eyebrow}</p>
+                        <h2 id="auth-modal-title" className="mt-2 font-display italic text-3xl leading-[1.05] text-ink">
+                            {headline}
                         </h2>
-                        <p className="text-sm text-gray-600 mt-1">
-                            {pendingEmailOtp
-                                ? 'Enter the 6-digit code sent to your email.'
-                                : isSignup
-                                    ? 'Join Vrateez for exclusive offers & faster checkout'
-                                    : 'Log in to your Vrateez account'}
-                        </p>
+                        <p className="mt-2 text-sm leading-relaxed text-ink/55">{subcopy}</p>
                     </div>
 
-                    {/* Form */}
-                    <form onSubmit={handleSubmit} className="px-8 py-6 space-y-4">
-                        {pendingEmailOtp && (
-                            <div>
-                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</label>
-                                <div className="mt-1 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-xl px-3 py-3">
-                                    {pendingEmailOtp}
-                                </div>
+                    <div className="overflow-y-auto px-7 pb-7">
+                        {/* Segmented control */}
+                        {!pendingEmailOtp && (
+                            <div
+                                role="tablist"
+                                aria-label="Log in or create account"
+                                className="mb-5 grid grid-cols-2 rounded-full bg-ink/[0.06] p-1"
+                            >
+                                <button
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={!isSignup}
+                                    onClick={openLogin}
+                                    className={`rounded-full py-2 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-turmeric/40 ${
+                                        !isSignup ? 'bg-white text-ink shadow-sm ring-1 ring-ink/[0.08]' : 'text-ink/55 hover:text-ink'
+                                    }`}
+                                >
+                                    Log in
+                                </button>
+                                <button
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={isSignup}
+                                    onClick={openSignup}
+                                    className={`rounded-full py-2 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-turmeric/40 ${
+                                        isSignup ? 'bg-white text-ink shadow-sm ring-1 ring-ink/[0.08]' : 'text-ink/55 hover:text-ink'
+                                    }`}
+                                >
+                                    Create account
+                                </button>
                             </div>
                         )}
 
-                        {!pendingEmailOtp && isSignup && (
-                            <>
+                        {/* Form */}
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {pendingEmailOtp && (
                                 <div>
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Full Name</label>
-                                    <div className="relative mt-1">
-                                        <UserIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                        <input
-                                            type="text"
-                                            value={name}
-                                            onChange={e => setName(e.target.value)}
-                                            placeholder="John Doe"
-                                            required
-                                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
-                                        />
+                                    <label className={labelClass}>Email</label>
+                                    <div className="mt-1.5 flex items-center gap-2.5 rounded-xl bg-white px-4 py-3 text-sm text-ink ring-1 ring-ink/[0.08]">
+                                        <Mail size={15} className="shrink-0 text-turmeric" />
+                                        <span className="truncate">{pendingEmailOtp}</span>
                                     </div>
                                 </div>
-                                <div>
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Mobile (optional)</label>
-                                    <div className="relative mt-1">
-                                        <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                        <input
-                                            type="tel"
-                                            value={phone}
-                                            onChange={e => setPhone(e.target.value)}
-                                            placeholder="9876543210 — for orders & Razorpay"
-                                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
-                                        />
+                            )}
+
+                            {!pendingEmailOtp && isSignup && (
+                                <>
+                                    <div>
+                                        <label htmlFor="auth-name" className={labelClass}>Full name</label>
+                                        <div className="relative mt-1.5">
+                                            <UserIcon size={16} className={iconClass} />
+                                            <input
+                                                id="auth-name"
+                                                type="text"
+                                                value={name}
+                                                onChange={e => setName(e.target.value)}
+                                                placeholder="Your name"
+                                                required
+                                                autoComplete="name"
+                                                className={`${inputClass} pl-11 pr-4`}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            </>
-                        )}
-
-                        {!pendingEmailOtp && (
-                            <div>
-                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</label>
-                                <div className="relative mt-1">
-                                    <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                    <input
-                                        type="email"
-                                        value={email}
-                                        onChange={e => setEmail(e.target.value)}
-                                        placeholder="you@example.com"
-                                        required
-                                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {!pendingEmailOtp && (
-                            <div>
-                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Password</label>
-                                <div className="relative mt-1">
-                                    <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                    <input
-                                        type={showPassword ? 'text' : 'password'}
-                                        value={password}
-                                        onChange={e => setPassword(e.target.value)}
-                                        placeholder="••••••••"
-                                        required
-                                        minLength={6}
-                                        className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                    >
-                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        {pendingEmailOtp && (
-                            <div>
-                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">OTP</label>
-                                <input
-                                    type="text"
-                                    value={otp}
-                                    onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                    placeholder="Enter 6-digit code"
-                                    required
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition tracking-[0.35em] text-center"
-                                />
-                                <div className="mt-2 flex items-center justify-between text-xs">
-                                    <button
-                                        type="button"
-                                        onClick={() => requestEmailOtp(pendingEmailOtp)}
-                                        className="text-orange-600 font-semibold hover:underline"
-                                    >
-                                        Resend OTP
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={clearPendingEmailOtp}
-                                        className="text-gray-500 hover:underline"
-                                    >
-                                        Use another email
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        {authError && (
-                            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
-                                {authError}
-                            </p>
-                        )}
-
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="w-full bg-gray-900 text-white py-3.5 rounded-xl font-bold text-sm hover:bg-orange-600 transition-colors"
-                        >
-                            {isLoading
-                                ? 'PLEASE WAIT...'
-                                : pendingEmailOtp
-                                    ? 'VERIFY OTP'
-                                    : isSignup
-                                        ? 'CREATE ACCOUNT'
-                                        : 'LOG IN'}
-                        </button>
-                    </form>
-
-                    {/* Toggle */}
-                    {!pendingEmailOtp && (
-                        <div className="px-8 pb-6 text-center text-sm text-gray-500">
-                            {isSignup ? (
-                                <>Already have an account?{' '}
-                                    <button onClick={openLogin} className="text-orange-600 font-semibold hover:underline">Log In</button>
-                                </>
-                            ) : (
-                                <>Don&apos;t have an account?{' '}
-                                    <button onClick={openSignup} className="text-orange-600 font-semibold hover:underline">Sign Up</button>
+                                    <div>
+                                        <label htmlFor="auth-phone" className={labelClass}>Mobile (optional)</label>
+                                        <div className="relative mt-1.5">
+                                            <Phone size={16} className={iconClass} />
+                                            <input
+                                                id="auth-phone"
+                                                type="tel"
+                                                value={phone}
+                                                onChange={e => setPhone(e.target.value)}
+                                                placeholder="9876543210 — for order updates"
+                                                autoComplete="tel"
+                                                className={`${inputClass} pl-11 pr-4`}
+                                            />
+                                        </div>
+                                    </div>
                                 </>
                             )}
-                        </div>
-                    )}
+
+                            {!pendingEmailOtp && (
+                                <div>
+                                    <label htmlFor="auth-email" className={labelClass}>Email</label>
+                                    <div className="relative mt-1.5">
+                                        <Mail size={16} className={iconClass} />
+                                        <input
+                                            id="auth-email"
+                                            type="email"
+                                            value={email}
+                                            onChange={e => setEmail(e.target.value)}
+                                            placeholder="you@example.com"
+                                            required
+                                            autoComplete="email"
+                                            className={`${inputClass} pl-11 pr-4`}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {!pendingEmailOtp && (
+                                <div>
+                                    <label htmlFor="auth-password" className={labelClass}>Password</label>
+                                    <div className="relative mt-1.5">
+                                        <Lock size={16} className={iconClass} />
+                                        <input
+                                            id="auth-password"
+                                            type={showPassword ? 'text' : 'password'}
+                                            value={password}
+                                            onChange={e => setPassword(e.target.value)}
+                                            placeholder="••••••••"
+                                            required
+                                            minLength={6}
+                                            autoComplete={isSignup ? 'new-password' : 'current-password'}
+                                            className={`${inputClass} pl-11 pr-12`}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-ink/40 transition hover:bg-ink/[0.05] hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-turmeric/40"
+                                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                        >
+                                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {pendingEmailOtp && (
+                                <div>
+                                    <label htmlFor="auth-otp" className={labelClass}>Verification code</label>
+                                    <input
+                                        id="auth-otp"
+                                        type="text"
+                                        inputMode="numeric"
+                                        autoComplete="one-time-code"
+                                        value={otp}
+                                        onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                        placeholder="••••••"
+                                        required
+                                        className={`${inputClass} mt-1.5 px-4 text-center font-label text-xl tracking-[0.45em] placeholder:tracking-[0.45em]`}
+                                    />
+                                    <div className="mt-2.5 flex items-center justify-between text-xs">
+                                        <button
+                                            type="button"
+                                            onClick={() => requestEmailOtp(pendingEmailOtp)}
+                                            className="font-semibold text-turmeric underline decoration-turmeric/30 underline-offset-4 transition hover:text-clay"
+                                        >
+                                            Resend code
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={clearPendingEmailOtp}
+                                            className="text-ink/50 underline decoration-ink/20 underline-offset-4 transition hover:text-ink"
+                                        >
+                                            Use another email
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {authError && (
+                                <p role="alert" className="rounded-xl bg-clay/10 px-3.5 py-3 text-sm text-clay ring-1 ring-clay/20">
+                                    {authError}
+                                </p>
+                            )}
+
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className="group pressable flex w-full items-center justify-center gap-2 rounded-full bg-turmeric py-4 text-sm font-semibold text-parchment shadow-lg shadow-turmeric/25 transition hover:bg-clay disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {isLoading ? <Loader2 size={16} className="animate-spin" /> : null}
+                                {ctaLabel}
+                                {!isLoading ? <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" /> : null}
+                            </button>
+                        </form>
+
+                        {!pendingEmailOtp && (
+                            <p className="mt-5 text-center text-xs text-ink/45">
+                                {isSignup ? (
+                                    <>
+                                        Already have an account?{' '}
+                                        <button type="button" onClick={openLogin} className="font-semibold text-turmeric transition hover:text-clay">
+                                            Log in
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        New to Vrateez?{' '}
+                                        <button type="button" onClick={openSignup} className="font-semibold text-turmeric transition hover:text-clay">
+                                            Create an account
+                                        </button>
+                                    </>
+                                )}
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
         </>

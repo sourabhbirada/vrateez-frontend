@@ -1,77 +1,63 @@
 import Link from 'next/link';
-import { Home, Search, ShoppingBag } from 'lucide-react';
+import { ArrowRight, Search, ShoppingBag } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-parchment flex items-center justify-center px-4">
-      <div className="max-w-2xl w-full text-center">
-        {/* 404 Illustration */}
-        <div className="mb-8">
-          <h1 className="text-[120px] md:text-[180px] font-extrabold text-ink/10 leading-none">
-            404
-          </h1>
-        </div>
+    <main className="relative flex min-h-[85vh] items-center overflow-hidden bg-parchment">
+      <div
+        className="pointer-events-none absolute -top-40 -right-40 h-[520px] w-[520px] rounded-full opacity-40 blur-3xl"
+        aria-hidden="true"
+        style={{ background: 'radial-gradient(circle, rgba(228,169,61,0.55) 0%, transparent 65%)' }}
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none font-display italic text-[12rem] leading-none text-ink/[0.05] md:text-[22rem]"
+      >
+        404
+      </span>
 
-        {/* Message */}
-        <h2 className="font-display italic text-3xl md:text-4xl text-ink mb-4">
-          Page Not Found
-        </h2>
-        <p className="text-ink/60 text-lg mb-8 max-w-md mx-auto">
-          Oops! The page you're looking for doesn't exist. It might have been moved or deleted.
+      <div className="relative mx-auto w-full max-w-3xl px-5 py-20 text-center md:px-8 md:py-28" data-reveal>
+        <p className="font-label text-[10px] tracking-[0.24em] uppercase text-clay">Page not found</p>
+        <h1 className="mt-4 font-display italic text-4xl leading-[1.02] text-ink md:text-6xl">
+          This page has gone stale.
+        </h1>
+        <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-ink/55">
+          The link may be old or mistyped. The cookies, thankfully, are still fresh.
         </p>
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Link
-            href="/"
-            className="flex items-center gap-2 bg-turmeric text-parchment px-6 py-3 rounded-full font-semibold hover:bg-clay transition-colors"
-          >
-            <Home size={20} />
-            Go Home
-          </Link>
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
             href="/shop"
-            className="flex items-center gap-2 bg-ink text-parchment px-6 py-3 rounded-full font-semibold hover:bg-basil transition-colors"
+            className="pressable group inline-flex w-full items-center justify-center gap-2 rounded-full bg-turmeric px-7 py-3.5 text-sm font-semibold text-parchment shadow-lg shadow-turmeric/25 transition hover:bg-clay sm:w-auto"
           >
-            <ShoppingBag size={20} />
-            Browse Products
+            <ShoppingBag size={16} />
+            Shop the range
+            <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+          </Link>
+          <Link
+            href="/track-order"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-ink ring-1 ring-ink/15 transition hover:bg-ink/5 sm:w-auto"
+          >
+            <Search size={15} />
+            Track an order
           </Link>
         </div>
 
-        {/* Search Suggestion */}
-        <div className="mt-12 pt-8 border-t border-ink/10">
-          <p className="text-ink/50 text-sm mb-4">Looking for something specific?</p>
-          <Link
-            href="/shop"
-            className="inline-flex items-center gap-2 text-turmeric font-semibold hover:underline"
-          >
-            <Search size={16} />
-            Search our products
+        <p className="mt-10 text-xs text-ink/45">
+          Or head to the{' '}
+          <Link href="/" className="text-clay underline underline-offset-4">
+            home page
           </Link>
-        </div>
-
-        {/* Popular Links */}
-        <div className="mt-8">
-          <p className="text-ink/40 text-xs mb-3">Popular pages:</p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            <Link href="/shop?category=cookies" className="text-xs text-ink/60 hover:text-turmeric transition">
-              Protein Cookies
-            </Link>
-            <span className="text-ink/20">•</span>
-            <Link href="/shop?category=energy-on-the-go" className="text-xs text-ink/60 hover:text-turmeric transition">
-              Energy Bars
-            </Link>
-            <span className="text-ink/20">•</span>
-            <Link href="/bulk-order" className="text-xs text-ink/60 hover:text-turmeric transition">
-              Bulk Orders
-            </Link>
-            <span className="text-ink/20">•</span>
-            <Link href="/faq" className="text-xs text-ink/60 hover:text-turmeric transition">
-              FAQ
-            </Link>
-          </div>
-        </div>
+          {' · '}
+          <Link href="/faq" className="text-clay underline underline-offset-4">
+            FAQ
+          </Link>
+          {' · '}
+          <Link href="/bulk-order" className="text-clay underline underline-offset-4">
+            Bulk orders
+          </Link>
+        </p>
       </div>
-    </div>
+    </main>
   );
 }

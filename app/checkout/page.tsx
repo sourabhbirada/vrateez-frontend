@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   Tag,
   Truck,
+  ShoppingBag,
   User as UserIcon,
   X,
 } from 'lucide-react';
@@ -139,6 +140,7 @@ export default function CheckoutPage() {
   const [info, setInfo] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [pinLookup, setPinLookup] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [summaryOpen, setSummaryOpen] = useState(false);
   const cityTouched = useRef(false);
 
   // coupon
@@ -159,6 +161,14 @@ export default function CheckoutPage() {
   const itemCount = useMemo(() => items.reduce((n, i) => n + i.quantity, 0), [items]);
   const codEnabled = settings?.shipping?.paymentMethods?.cod ?? true;
   const deliveryDays = settings?.shipping?.deliveryDays || '3 to 7 days';
+  const deliveryWindow = useMemo(() => {
+    const nums = (settings?.shipping?.deliveryDays || '3-7').match(/\d+/g)?.map(Number) || [3, 7];
+    const min = nums[0] ?? 3;
+    const max = nums[1] ?? min + 3;
+    const fmt = (d: number) =>
+      new Date(Date.now() + d * 86_400_000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    return `${fmt(min)} to ${fmt(max)}`;
+  }, [settings?.shipping?.deliveryDays]);
 
   // --- effects --------------------------------------------------------------
   useEffect(() => {
@@ -471,6 +481,43 @@ export default function CheckoutPage() {
               );
             })}
           </ol>
+        </div>
+
+        {/* Mobile order summary toggle */}
+        <div className="lg:hidden mb-5 overflow-hidden rounded-2xl bg-white ring-1 ring-ink/[0.08]">
+          <button
+            type="button"
+            onClick={() => setSummaryOpen((v) => !v)}
+            aria-expanded={summaryOpen}
+            className="flex w-full items-center justify-between px-4 py-3.5 text-sm"
+          >
+            <span className="inline-flex items-center gap-2 font-semibold text-ink">
+              <ShoppingBag size={16} className="text-clay" />
+              {summaryOpen ? 'Hide' : 'Show'} order summary
+              <ChevronDown size={15} className={`text-ink/40 transition-transform ${summaryOpen ? 'rotate-180' : ''}`} />
+            </span>
+            <span className="font-display text-xl text-ink">{formatInr(total)}</span>
+          </button>
+          <div className={`grid transition-[grid-template-rows] duration-300 ${summaryOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+            <ul className="overflow-hidden">
+              {items.map((item) => (
+                <li key={`m-${item.id}`} className="flex items-center gap-3 border-t border-ink/[0.06] px-4 py-3">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-parchment ring-1 ring-ink/[0.06]">
+                    <Image src={resolveImage(item.image)} alt={item.name} fill className="object-cover" sizes="48px" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-ink">{item.name}</p>
+                    <p className="text-xs text-ink/45">Qty {item.quantity}</p>
+                  </div>
+                  <p className="text-sm font-semibold text-ink">{formatInr(item.price * item.quantity)}</p>
+                </li>
+              ))}
+              <li className="flex items-center justify-between border-t border-ink/[0.06] px-4 py-3 text-xs text-ink/55">
+                <span>Shipping {shippingCharge === 0 ? 'free' : formatInr(shippingCharge)}{discountAmount > 0 ? ` · discount -${formatInr(discountAmount)}` : ''}</span>
+                <span className="inline-flex items-center gap-1"><Truck size={12} className="text-clay" /> {deliveryWindow}</span>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 lg:gap-8 items-start">
@@ -856,6 +903,13 @@ export default function CheckoutPage() {
                   </div>
                   <p className="text-[11px] text-ink/40">Inclusive of all taxes.</p>
                 </dl>
+
+                <div className="mt-4 flex items-center justify-between rounded-xl bg-basil/[0.07] px-3.5 py-2.5 text-xs ring-1 ring-basil/15">
+                  <span className="inline-flex items-center gap-1.5 text-ink/70">
+                    <Truck size={13} className="text-basil" /> Estimated delivery
+                  </span>
+                  <span className="font-semibold text-ink">{deliveryWindow}</span>
+                </div>
 
                 {info ? <div className="mt-4 rounded-xl bg-ink/5 px-3.5 py-3 text-sm text-ink/80 ring-1 ring-ink/10">{info}</div> : null}
                 {error ? <div className="mt-4 rounded-xl bg-clay/10 px-3.5 py-3 text-sm text-clay ring-1 ring-clay/20">{error}</div> : null}

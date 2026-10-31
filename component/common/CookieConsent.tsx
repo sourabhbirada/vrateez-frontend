@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { activityTracker } from "@/lib/activityTracker";
-import { X } from "lucide-react";
 
 export default function CookieConsent() {
 	const [showBanner, setShowBanner] = useState(false);
@@ -33,39 +33,39 @@ export default function CookieConsent() {
 	if (!showBanner) return null;
 
 	return (
-		<div className="fixed bottom-0 left-0 right-0 z-50 bg-white shadow-lg border-t border-gray-200 animate-slide-up">
-			<div className="container mx-auto px-4 py-4 md:py-6">
-				<div className="flex flex-col md:flex-row items-center justify-between gap-4">
-					<div className="flex-1">
-						<h3 className="text-lg font-semibold text-gray-900 mb-2">🍪 We use cookies</h3>
-						<p className="text-sm text-gray-600">
-							We use cookies to enhance your browsing experience, analyze site traffic, and understand where our visitors are coming from. By
-							clicking "Accept", you consent to our use of cookies.{" "}
-							<a href="/privacy-policy" className="text-green-600 hover:underline">
-								Learn more
-							</a>
-						</p>
-					</div>
+		<div
+			role="dialog"
+			aria-live="polite"
+			aria-labelledby="cookie-consent-title"
+			className="fixed bottom-[4.75rem] left-4 right-4 z-50 rounded-[22px] bg-parchment p-5 text-ink ring-1 ring-ink/[0.08] shadow-[0_24px_50px_-24px_rgba(36,31,22,0.55)] animate-slideUp sm:bottom-6 sm:left-6 sm:right-auto sm:max-w-sm"
+		>
+			<p className="font-label text-[10px] tracking-[0.22em] uppercase text-clay">Cookies</p>
+			<h3 id="cookie-consent-title" className="mt-1.5 font-display italic text-xl leading-tight text-ink">
+				A small note on cookies.
+			</h3>
+			<p className="mt-2 text-[13px] leading-relaxed text-ink/60">
+				We use cookies to keep your cart, understand what people browse and make the shop better. Accept to help us,
+				or reject and only the essentials stay.{" "}
+				<Link href="/faq" className="font-semibold text-ink/70 underline decoration-ink/20 underline-offset-4 transition hover:text-ink">
+					Learn more
+				</Link>
+			</p>
 
-					<div className="flex items-center gap-3">
-						<button
-							onClick={handleReject}
-							className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-						>
-							Reject
-						</button>
-						<button
-							onClick={handleAccept}
-							className="px-6 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
-						>
-							Accept All
-						</button>
-					</div>
-
-					<button onClick={handleReject} className="absolute top-4 right-4 md:hidden text-gray-400 hover:text-gray-600">
-						<X size={20} />
-					</button>
-				</div>
+			<div className="mt-4 flex items-center gap-2">
+				<button
+					type="button"
+					onClick={handleReject}
+					className="flex-1 rounded-full px-4 py-2.5 text-xs font-semibold text-ink ring-1 ring-ink/15 transition hover:bg-ink/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-turmeric/40"
+				>
+					Reject
+				</button>
+				<button
+					type="button"
+					onClick={handleAccept}
+					className="pressable flex-1 rounded-full bg-turmeric px-4 py-2.5 text-xs font-semibold text-parchment shadow-lg shadow-turmeric/25 transition hover:bg-clay focus:outline-none focus-visible:ring-2 focus-visible:ring-turmeric/40"
+				>
+					Accept
+				</button>
 			</div>
 		</div>
 	);
