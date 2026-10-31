@@ -64,6 +64,14 @@ function OrderSuccessContent() {
   const trackHref = `/track-order?orderId=${encodeURIComponent(orderId)}${email ? `&email=${encodeURIComponent(email)}` : ''}`;
   const supportEmail = settings?.contact?.supportEmail || 'vrateezfoodspvtltd@gmail.com';
   const whatsapp = settings?.contact?.whatsapp;
+  const storeDigits = (() => {
+    const d = (whatsapp || '916375010189').replace(/\D/g, '');
+    return d.length === 10 ? `91${d}` : d;
+  })();
+  const optInText = `Hi Vrateez! I just placed order ${order ? displayOrderId(order) : `#${orderId.slice(-6).toUpperCase()}`}${
+    order?.guestInfo?.name || user?.name ? ` (${order?.guestInfo?.name || user?.name})` : ''
+  }. Please send my order updates on this number.`;
+  const whatsappOptInHref = `https://wa.me/${storeDigits}?text=${encodeURIComponent(optInText)}`;
   const deliveryDays = settings?.shipping?.deliveryDays || '3 to 7 days';
 
   const copyId = async () => {
@@ -126,6 +134,19 @@ function OrderSuccessContent() {
               {copied ? <Check size={12} /> : <Copy size={12} />}
               {copied ? 'Copied' : 'Copy'}
             </button>
+          </div>
+
+          <div className="mt-5 flex flex-col items-center gap-2">
+            <a
+              href={whatsappOptInHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-6 py-3 text-sm font-semibold text-ink shadow-lg shadow-black/20 transition hover:bg-[#1ebe5d]"
+            >
+              <MessageCircle size={16} />
+              Get order updates on WhatsApp
+            </a>
+            <p className="text-[11px] text-parchment/50">One tap sends us your order number so we can message you packing and shipping updates.</p>
           </div>
         </div>
       </section>
