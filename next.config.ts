@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  outputFileTracingIncludes: {
+    "/blog": ["./content/blog/**/*"],
+    "/blog/[slug]": ["./content/blog/**/*"],
+    "/sitemap.xml": ["./content/blog/**/*"],
+  },
   images: {
     remotePatterns: [
       {

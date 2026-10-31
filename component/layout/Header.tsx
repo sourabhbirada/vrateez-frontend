@@ -19,6 +19,7 @@ const subscribeScroll = (onChange: () => void) => {
 
 const NAV_LINKS = [
     { href: '/shop', label: 'Shop' },
+    { href: '/blog', label: 'Blog' },
     { href: '/track-order', label: 'Track order' },
     { href: '/bulk-order', label: 'Bulk order' },
     { href: '/faq', label: 'FAQ' },

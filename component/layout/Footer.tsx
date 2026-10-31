@@ -29,6 +29,7 @@ const DEFAULT_CATEGORIES = [
 
 const COMPANY_LINKS = [
   { href: '/about-us', label: 'About Us' },
+  { href: '/blog', label: 'Blog' },
   { href: '/bulk-order', label: 'Bulk Orders' },
   { href: '/track-order', label: 'Track Order' },
   { href: '/faq', label: 'FAQ' },
