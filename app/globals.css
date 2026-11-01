@@ -89,8 +89,18 @@ html {
 .backface-hidden { backface-visibility: hidden; }
 .rotate-y-180 { transform: rotateY(180deg); }
 
+/* Film-grain texture. A small pre-rendered noise tile: the previous SVG feTurbulence filter was
+   recomputed for every section on each paint, which delayed the first paint on phones by seconds. */
 .grain-overlay {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-image: url("/grain.png");
+  background-size: 96px 96px;
+}
+
+/* Below-the-fold homepage sections: the browser skips their layout and paint until they are
+   near the viewport. contain-intrinsic-size keeps the scrollbar stable before they render. */
+.defer-render {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
 }
 
 /* Scroll reveal (activated by <ScrollReveal /> adding .reveal-ready to <html>) */

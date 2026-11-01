@@ -11,7 +11,7 @@ export default function NotFound() {
   return (
     <main className="relative flex min-h-[85vh] items-center overflow-hidden bg-parchment">
       <div
-        className="pointer-events-none absolute -top-40 -right-40 h-[520px] w-[520px] rounded-full opacity-40 blur-3xl"
+        className="pointer-events-none absolute -top-40 -right-40 h-[520px] w-[520px] rounded-full opacity-40"
         aria-hidden="true"
         style={{ background: 'radial-gradient(circle, rgba(228,169,61,0.55) 0%, transparent 65%)' }}
       />

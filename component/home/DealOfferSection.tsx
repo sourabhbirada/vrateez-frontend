@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowRight, Check, Gift, Package, ShieldCheck, Sparkles, Truck } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
@@ -126,8 +127,25 @@ function DealCard({ deal }: { deal: Deal }) {
                                     <source src={deal.video} type="video/mp4" />
                                 </video>
                             ) : deal.image ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={resolveImage(deal.image)} alt={deal.title} className="absolute inset-0 h-full w-full object-cover" />
+                                resolveImage(deal.image).startsWith('/') ? (
+                                    // Optimised and lazy: the raw PNG was ~1 MB and React preloaded it, competing with the hero image.
+                                    <Image
+                                        src={resolveImage(deal.image)}
+                                        alt={deal.title}
+                                        fill
+                                        sizes="(min-width: 1024px) 50vw, 100vw"
+                                        className="object-cover"
+                                    />
+                                ) : (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={resolveImage(deal.image)}
+                                        alt={deal.title}
+                                        loading="lazy"
+                                        decoding="async"
+                                        className="absolute inset-0 h-full w-full object-cover"
+                                    />
+                                )
                             ) : (
                                 <div className="absolute inset-0 bg-basil" />
                             )}

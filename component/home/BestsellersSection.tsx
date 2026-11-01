@@ -91,7 +91,7 @@ export default function BestsellersSection() {
                   #1 seller
                 </span>
               ) : null}
-              <ProductCard product={toCard(p)} onAdd={handleAdd} priority={i < 2} />
+              <ProductCard product={toCard(p)} onAdd={handleAdd} />
             </div>
           ))}
         </div>
