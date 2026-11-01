@@ -53,7 +53,7 @@ export default function WhyVrateezSection() {
     <section className="relative overflow-hidden bg-parchment" id="why-vrateez">
       <div className="pointer-events-none absolute inset-0 grain-overlay opacity-[0.04] mix-blend-multiply" aria-hidden="true" />
       <div
-        className="pointer-events-none absolute -top-40 -right-40 h-[520px] w-[520px] rounded-full opacity-40 blur-3xl"
+        className="pointer-events-none absolute -top-40 -right-40 h-[520px] w-[520px] rounded-full opacity-40"
         aria-hidden="true"
         style={{ background: 'radial-gradient(circle, rgba(228,169,61,0.55) 0%, transparent 65%)' }}
       />

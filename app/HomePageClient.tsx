@@ -31,18 +31,52 @@ export default function HomePage() {
       <h1 className="sr-only">Vrateez: vrat-friendly millet protein cookies, energy bars and fasting snacks</h1>
       {(sections?.heroCarousel ?? true) && <HeroSection />}
       <WhyVrateezSection />
-      <UspStrip />
-      <DealOfferSection />
-      <BestsellersSection />
-      <BundlesSection />
-      {(sections?.benefitsSection ?? true) && <BenefitsSection />}
-      <CompareSection />
-      {(sections?.ourProducts ?? true) && <OurProductsSection />}
-      <ProductsSection />
-      {(sections?.testimonials ?? true) && <TestimonialsSection />}
-      <FaqSection />
-      {(sections?.availableAtPartners ?? true) && <AvailableAtSection />}
-      <FinalCtaSection />
+      {/* Below-the-fold sections skip layout and paint until they near the viewport.
+          Their content stays in the HTML for search engines and screen readers. */}
+      <div className="defer-render">
+        <UspStrip />
+      </div>
+      <div className="defer-render">
+        <DealOfferSection />
+      </div>
+      <div className="defer-render">
+        <BestsellersSection />
+      </div>
+      <div className="defer-render">
+        <BundlesSection />
+      </div>
+      {(sections?.benefitsSection ?? true) && (
+        <div className="defer-render">
+          <BenefitsSection />
+        </div>
+      )}
+      <div className="defer-render">
+        <CompareSection />
+      </div>
+      {(sections?.ourProducts ?? true) && (
+        <div className="defer-render">
+          <OurProductsSection />
+        </div>
+      )}
+      <div className="defer-render">
+        <ProductsSection />
+      </div>
+      {(sections?.testimonials ?? true) && (
+        <div className="defer-render">
+          <TestimonialsSection />
+        </div>
+      )}
+      <div className="defer-render">
+        <FaqSection />
+      </div>
+      {(sections?.availableAtPartners ?? true) && (
+        <div className="defer-render">
+          <AvailableAtSection />
+        </div>
+      )}
+      <div className="defer-render">
+        <FinalCtaSection />
+      </div>
       <WelcomeOffer />
     </main>
   );

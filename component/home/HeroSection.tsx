@@ -268,37 +268,50 @@ export default function HeroSection() {
 
                 <div className="relative h-[52vh] md:h-[82vh] order-1 md:order-2">
                     <div
-                        className={`absolute inset-0 transition-opacity duration-500 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
+                        className="absolute inset-0"
                         style={{
                             clipPath: 'polygon(13% 0, 100% 0, 100% 100%, 0% 100%)',
                         }}
                     >
-                        {slide.video ? (
-                            <video
-                                key={slide.video}
-                                autoPlay
-                                muted
-                                loop
-                                playsInline
-                                poster={resolveImage(slide.image || undefined)}
-                                className="absolute inset-0 h-full w-full object-cover"
-                            >
-                                <source src={slide.video} type="video/mp4" />
-                            </video>
-                        ) : slide.image ? (
-                            <Image
-                                key={slide.image}
-                                src={resolveImage(slide.image)}
-                                alt={slide.title.replace(/\s+/g, ' ')}
-                                fill
-                                className={`object-cover animate-kenburns ${slide.imagePosition}`}
-                                priority={current === 0}
-                                fetchPriority={current === 0 ? 'high' : 'auto'}
-                                sizes="(min-width: 768px) 58vw, 100vw"
-                            />
-                        ) : (
-                            <div className="absolute inset-0 bg-ink/10" />
-                        )}
+                        {/* Every slide image stays mounted and cross-fades. Remounting one image per slide made each
+                            new slide start as an unloaded lazy image, which showed a grey block every 5 seconds.
+                            The first slide is the LCP image (high priority); the rest load quietly at low priority. */}
+                        {slides.map((s, i) => {
+                            const visible = i === current && !isAnimating;
+                            return (
+                                <div
+                                    key={`${s.image}-${s.video ?? ''}-${i}`}
+                                    className={`absolute inset-0 transition-opacity duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}
+                                    aria-hidden={i !== current}
+                                >
+                                    {s.video && i === current ? (
+                                        <video
+                                            autoPlay
+                                            muted
+                                            loop
+                                            playsInline
+                                            poster={resolveImage(s.image || undefined)}
+                                            className="absolute inset-0 h-full w-full object-cover"
+                                        >
+                                            <source src={s.video} type="video/mp4" />
+                                        </video>
+                                    ) : s.image ? (
+                                        <Image
+                                            src={resolveImage(s.image)}
+                                            alt={i === current ? s.title.replace(/\s+/g, ' ') : ''}
+                                            fill
+                                            className={`object-cover ${i === current ? 'animate-kenburns' : ''} ${s.imagePosition}`}
+                                            priority={i === 0}
+                                            fetchPriority={i === 0 ? 'high' : 'low'}
+                                            loading={i === 0 ? undefined : 'eager'}
+                                            sizes="(min-width: 768px) 58vw, 100vw"
+                                        />
+                                    ) : (
+                                        <div className="absolute inset-0 bg-ink/10" />
+                                    )}
+                                </div>
+                            );
+                        })}
                         <div className="absolute inset-0 bg-linear-to-t from-ink/45 via-transparent to-transparent md:bg-linear-to-l md:from-transparent md:via-transparent md:to-ink/10" />
                     </div>
 
