@@ -15,6 +15,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async headers() {
+    // Baseline security headers. The CSP only sets directives that cannot break
+    // Razorpay, analytics or images: no framing by other sites, no plugins, no <base> hijack.
+    const security = [
+      { key: "X-Frame-Options", value: "SAMEORIGIN" },
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+      { key: "Content-Security-Policy", value: "frame-ancestors 'self'; object-src 'none'; base-uri 'self'; upgrade-insecure-requests" },
+    ];
+    return [{ source: "/:path*", headers: security }];
+  },
   async redirects() {
     return [
       { source: "/raksha-bandhan", destination: "/diwali", permanent: true },

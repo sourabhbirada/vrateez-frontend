@@ -2,10 +2,9 @@
 
 import { ArrowRight, Check, Gift, Package, ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
-import { getDealsApi } from '@/lib/api/dealApi';
-import { getProductBySlugApi } from '@/lib/api/productApi';
+import { useCatalog, useProducts } from '@/context/CatalogContext';
 import type { Deal, Product } from '@/lib/api/types';
 import { resolveImage } from '@/lib/images';
 
@@ -64,24 +63,10 @@ function MarqueeStrip() {
 
 function DealCard({ deal }: { deal: Deal }) {
     const { addToCart, toggleCart } = useCart();
-    const [product, setProduct] = useState<Product | null>(null);
+    const { products } = useProducts();
+    const slug = deal.productSlug?.trim();
+    const product: Product | null = (slug && products.find((p) => p.slug === slug)) || null;
     const [adding, setAdding] = useState(false);
-
-    useEffect(() => {
-        let cancelled = false;
-        const slug = deal.productSlug?.trim();
-        if (!slug) return;
-        getProductBySlugApi(slug)
-            .then((p) => {
-                if (!cancelled) setProduct(p);
-            })
-            .catch(() => {
-                if (!cancelled) setProduct(null);
-            });
-        return () => {
-            cancelled = true;
-        };
-    }, [deal.productSlug]);
 
     const detailsHref = deal.ctaLink && deal.ctaLink.startsWith('/') && !deal.ctaLink.startsWith('/product/') ? deal.ctaLink : '/diwali';
     const productHref = deal.productSlug?.trim() ? `/product/${deal.productSlug.trim()}` : detailsHref;
@@ -271,23 +256,8 @@ function DealCard({ deal }: { deal: Deal }) {
 }
 
 export default function DealOfferSection() {
-    const [deals, setDeals] = useState<Deal[]>([FALLBACK_DEAL]);
-
-    useEffect(() => {
-        let cancelled = false;
-        async function load() {
-            try {
-                const items = await getDealsApi('homepage');
-                if (!cancelled) setDeals(items.length ? items : [FALLBACK_DEAL]);
-            } catch {
-                if (!cancelled) setDeals([FALLBACK_DEAL]);
-            }
-        }
-        void load();
-        return () => {
-            cancelled = true;
-        };
-    }, []);
+    const { homeDeals } = useCatalog();
+    const deals = homeDeals && homeDeals.length ? homeDeals : [FALLBACK_DEAL];
 
     return (
         <>

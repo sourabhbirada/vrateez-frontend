@@ -1,9 +1,8 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { AlertCircle, ArrowRight, Hash, Loader2, Mail, MapPin, Package, Search, Truck } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
@@ -33,7 +32,11 @@ const STATUS_PILL: Record<Order['orderStatus'], string> = {
 };
 
 function TrackOrderContent() {
-  const searchParams = useSearchParams();
+  // Read ?orderId= / ?trackingNumber= from the URL in the browser only. Using useSearchParams
+  // here forced the whole page behind a Suspense fallback, so crawlers saw only "Loading tracker…".
+  const [searchParams] = useState(() =>
+    typeof window === 'undefined' ? new URLSearchParams() : new URLSearchParams(window.location.search),
+  );
   const { user } = useAuth();
   const { settings } = useSettings();
 
@@ -388,13 +391,5 @@ function TrackOrderContent() {
 }
 
 export default function TrackOrderPage() {
-  return (
-    <Suspense
-      fallback={
-        <main className="min-h-screen bg-parchment flex items-center justify-center text-ink/50 text-sm">Loading tracker…</main>
-      }
-    >
-      <TrackOrderContent />
-    </Suspense>
-  );
+  return <TrackOrderContent />;
 }

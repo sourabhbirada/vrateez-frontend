@@ -2,11 +2,10 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { ArrowRight, Flame, ShieldCheck, Sprout, Star, Truck, Wheat } from 'lucide-react';
 import { useSettings } from '@/context/SettingsContext';
-import { getProductsApi } from '@/lib/api/productApi';
-import type { Product } from '@/lib/api/types';
+import { useProducts } from '@/context/CatalogContext';
 import CountUp from '@/component/common/CountUp';
 
 const PROOF = [
@@ -41,19 +40,7 @@ const REASONS = [
 export default function WhyVrateezSection() {
   const { settings } = useSettings();
   const threshold = settings?.shipping?.freeShippingThreshold ?? 499;
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    getProductsApi({ limit: 100 })
-      .then((res) => {
-        if (!cancelled) setProducts(res.items);
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { products } = useProducts();
 
   const { avgRating, totalReviews } = useMemo(() => {
     const eligible = products.filter((p) => p.isActive !== false && p.category !== 'testing' && p.reviews > 0);

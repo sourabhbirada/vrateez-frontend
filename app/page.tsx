@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import HomePageClient from './HomePageClient';
 import { DEFAULT_FAQS, faqPageSchema } from '@/lib/seoFaqs';
+import { DEFAULT_OG_IMAGE, SITE_URL } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: "Buy Vrat Food, Healthy Protein Cookies & Fasting Snacks Online in India",
-  description: "Order vrat-friendly protein cookies, energy bars & fasting snacks online. Perfect for Navratri, Ekadashi & all vrat occasions. Made with millet, nuts & natural ingredients. Zero added sugar, high protein, FSSAI certified. Free shipping on orders above ₹499. Shop now!",
+  title: { absolute: "Vrateez | Vrat Snacks, Millet Protein Cookies & Energy Bars" },
+  description: "Vrat-friendly millet protein cookies, energy bars and makhana. Zero added sugar, no palm oil, FSSAI certified. Free delivery above ₹499, COD available.",
+  alternates: { canonical: SITE_URL },
   keywords: [
     "buy vrat food online",
     "vrat snacks",
@@ -27,6 +29,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Vrateez | Vrat Food, Healthy Protein Cookies & Fasting Snacks",
     description: "Premium vrat-friendly protein cookies, energy bars & fasting snacks. Perfect for Navratri & all vrat occasions. Natural ingredients, zero added sugar, high protein. Free shipping above ₹499.",
+    url: SITE_URL,
+    type: "website",
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: "Vrateez vrat-friendly snacks" }],
   },
 };
 

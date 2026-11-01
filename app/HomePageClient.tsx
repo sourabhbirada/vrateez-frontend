@@ -23,15 +23,12 @@ import { useSettings } from '@/context/SettingsContext';
  * → why us (benefits, comparison) → full range → proof (reviews) → objections (FAQ) → close.
  */
 export default function HomePage() {
-  const { settings, loading } = useSettings();
+  const { settings } = useSettings();
   const sections = settings?.appearance?.homepageSections;
-
-  if (loading) {
-    return <main className="min-h-[50vh] bg-parchment" />;
-  }
 
   return (
     <main>
+      <h1 className="sr-only">Vrateez: vrat-friendly millet protein cookies, energy bars and fasting snacks</h1>
       {(sections?.heroCarousel ?? true) && <HeroSection />}
       <WhyVrateezSection />
       <UspStrip />

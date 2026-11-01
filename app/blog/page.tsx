@@ -8,7 +8,7 @@ import { SITE_URL } from '@/lib/site';
 export const dynamic = 'force-static';
 
 export const metadata: Metadata = {
-  title: 'Blog: Vrat Food, Healthy Snacking & Festive Gifting Guides',
+  title: 'Vrat Food, Healthy Snacking and Gifting Guides',
   description:
     'Guides from the Vrateez kitchen: what to eat during vrat, how to read snack labels, Diwali and corporate gifting ideas, and millet recipes.',
   alternates: { canonical: `${SITE_URL}/blog` },
