@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
-import Script from "next/script";
 import Header from '../component/layout/Header';
 import AnnouncementBar from '../component/layout/AnnouncementBar';
 import Footer from '../component/layout/Footer';
@@ -14,6 +13,8 @@ import ScrollReveal from '../component/common/ScrollReveal';
 import { CartProvider } from '../context/CartContext';
 import { AuthProvider } from '../context/AuthContext';
 import { SettingsProvider } from '../context/SettingsContext';
+import { CatalogProvider } from '../context/CatalogContext';
+import { getStorefrontData } from '@/lib/server/catalog';
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -175,132 +176,149 @@ export const metadata: Metadata = {
     images: [`${SITE_URL}/og-image.jpg`],
     creator: "@vrateez",
   },
+  // Only preview limits here. index/follow are the default, and setting them globally put a
+  // second, conflicting robots tag on the 404 page next to Next.js's own "noindex".
   robots: {
-    index: true,
-    follow: true,
     googleBot: {
-      index: true,
-      follow: true,
       'max-video-preview': -1,
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
-  },
-  alternates: {
-    canonical: SITE_URL,
   },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
   },
 };
 
-export default function RootLayout({
+const DEFAULT_CONTACT = {
+  phone: "+91-70700 88100",
+  whatsapp: "+916375010189",
+  email: "support@vrateez.com",
+};
+
+const SOCIAL_PROFILES = [
+  "https://instagram.com/vrateez",
+  "https://facebook.com/vrateez",
+  "https://twitter.com/vrateez",
+  "https://youtube.com/@vrateez",
+];
+
+function JsonLd({ data }: { data: unknown }) {
+  // Plain script tag (not next/script) so the schema is in the server HTML that crawlers read.
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />;
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const storefront = await getStorefrontData();
+  const contact = storefront.settings?.contact;
+  const phone = contact?.phone || DEFAULT_CONTACT.phone;
+  const email = contact?.supportEmail || DEFAULT_CONTACT.email;
+  const social = storefront.settings?.socialMedia;
+  const sameAs = [social?.instagram, social?.facebook, social?.twitter, social?.youtube].filter(Boolean) as string[];
+
+  const address = {
+    "@type": "PostalAddress",
+    addressLocality: "Jaipur",
+    addressRegion: "Rajasthan",
+    addressCountry: "IN",
+  };
+
+  const organization = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${SITE_URL}/#organization`,
+    name: SITE_NAME,
+    legalName: "Vrateez Foods Pvt. Ltd.",
+    alternateName: "Vrateez - Vrat Food & Healthy Snacks",
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo.png`,
+    description: SITE_DESCRIPTION,
+    email,
+    telephone: phone,
+    address,
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: phone,
+      email,
+      contactType: "customer service",
+      areaServed: "IN",
+      availableLanguage: ["en", "hi"],
+    },
+    sameAs: sameAs.length ? sameAs : SOCIAL_PROFILES,
+  };
+
+  const website = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${SITE_URL}/#website`,
+    name: SITE_NAME,
+    url: SITE_URL,
+    publisher: { "@id": `${SITE_URL}/#organization` },
+    inLanguage: "en-IN",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/shop?search={search_term_string}` },
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  const store = {
+    "@context": "https://schema.org",
+    "@type": "OnlineStore",
+    "@id": `${SITE_URL}/#store`,
+    name: SITE_NAME,
+    url: SITE_URL,
+    image: `${SITE_URL}/og-image.jpg`,
+    logo: `${SITE_URL}/logo.png`,
+    description: "Online store for vrat-friendly protein cookies, energy bars, makhana and fasting snacks, shipped across India from Jaipur.",
+    address,
+    telephone: phone,
+    email,
+    priceRange: "₹₹",
+    currenciesAccepted: "INR",
+    paymentAccepted: "Cash on delivery, UPI, Credit Card, Debit Card, Net banking",
+    parentOrganization: { "@id": `${SITE_URL}/#organization` },
+  };
+
   return (
-    <html lang="en">
+    <html lang="en-IN">
       <head>
-        {/* Structured Data - Organization */}
-        <Script
-          id="organization-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: SITE_NAME,
-              alternateName: "Vrateez - Vrat Food & Healthy Snacks",
-              url: SITE_URL,
-              logo: `${SITE_URL}/logo.png`,
-              description: SITE_DESCRIPTION,
-              address: {
-                "@type": "PostalAddress",
-                addressLocality: "Jaipur",
-                addressRegion: "Rajasthan",
-                addressCountry: "IN",
-              },
-              contactPoint: {
-                "@type": "ContactPoint",
-                telephone: "+91-9407230914",
-                contactType: "Customer Service",
-                areaServed: "IN",
-                availableLanguage: ["en", "hi"],
-              },
-              sameAs: [
-                "https://instagram.com/vrateez",
-                "https://facebook.com/vrateez",
-                "https://twitter.com/vrateez",
-              ],
-            }),
-          }}
-        />
-
-        {/* Structured Data - WebSite */}
-        <Script
-          id="website-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              name: SITE_NAME,
-              url: SITE_URL,
-              potentialAction: {
-                "@type": "SearchAction",
-                target: `${SITE_URL}/shop?search={search_term_string}`,
-                "query-input": "required name=search_term_string",
-              },
-            }),
-          }}
-        />
-
-        {/* Structured Data - Store */}
-        <Script
-          id="store-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Store",
-              name: SITE_NAME,
-              image: `${SITE_URL}/logo.png`,
-              description: "Online store for vrat-friendly healthy protein cookies, energy bars and fasting snacks in India",
-              address: {
-                "@type": "PostalAddress",
-                addressLocality: "Jaipur",
-                addressRegion: "Rajasthan",
-                addressCountry: "IN",
-              },
-              priceRange: "₹₹",
-              telephone: "+91-9407230914",
-              url: SITE_URL,
-              currenciesAccepted: "INR",
-              paymentAccepted: "Cash, Credit Card, Debit Card, UPI",
-              openingHours: "Mo-Su 00:00-23:59",
-            }),
-          }}
-        />
+        <JsonLd data={organization} />
+        <JsonLd data={website} />
+        <JsonLd data={store} />
       </head>
       <body
         className={`${fraunces.variable} ${inter.variable} ${plexMono.variable} font-sans antialiased`}
       >
         <AuthProvider>
-          <SettingsProvider>
-            <CartProvider>
-              <ActivityTracker />
-              <Analytics />
-              <ScrollReveal />
-              <AnnouncementBar />
-              <Header />
-              {children}
-              <Footer />
-              <CartSidebar />
-              <AuthModal />
-              <WhatsAppButton />
-              <CookieConsent />
-            </CartProvider>
+          <SettingsProvider initialSettings={storefront.settings}>
+            <CatalogProvider
+              initial={{
+                products: storefront.products,
+                categories: storefront.categories,
+                banners: storefront.banners,
+                homeDeals: storefront.homeDeals,
+                landingDeals: storefront.landingDeals,
+              }}
+            >
+              <CartProvider>
+                <ActivityTracker />
+                <Analytics />
+                <ScrollReveal />
+                <AnnouncementBar />
+                <Header />
+                {children}
+                <Footer />
+                <CartSidebar />
+                <AuthModal />
+                <WhatsAppButton />
+                <CookieConsent />
+              </CartProvider>
+            </CatalogProvider>
           </SettingsProvider>
         </AuthProvider>
       </body>

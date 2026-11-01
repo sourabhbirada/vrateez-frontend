@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { ArrowRight, Star } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-import { getProductsApi } from '@/lib/api/productApi';
+import { useProducts } from '@/context/CatalogContext';
 import type { Product } from '@/lib/api/types';
 import ProductCard, { type ProductCardData } from '@/component/product/ProductCard';
 
@@ -29,21 +29,7 @@ function toCard(p: Product): ProductCardData {
 
 export default function BestsellersSection() {
   const { addToCart } = useCart();
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    getProductsApi({ limit: 100 })
-      .then((res) => {
-        if (!cancelled) setProducts(res.items);
-      })
-      .catch(() => {
-        if (!cancelled) setProducts([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { products } = useProducts();
 
   const { top, avgRating, totalReviews } = useMemo(() => {
     const eligible = products.filter((p) => p.isActive !== false && !HIDDEN_CATEGORIES.has(p.category) && p.reviews > 0);

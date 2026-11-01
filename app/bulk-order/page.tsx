@@ -173,7 +173,7 @@ export default function BulkOrderPage() {
                 <div className="absolute inset-0">
                     <Image
                         src="/virteez/Assorted cookie box.jpeg"
-                        alt=""
+                        alt="Assorted Vrateez cookie gift box for bulk and corporate orders"
                         fill
                         priority
                         sizes="100vw"

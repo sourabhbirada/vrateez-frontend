@@ -1,18 +1,16 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { ArrowUpDown, Search, SlidersHorizontal, X } from 'lucide-react';
 import ProductCard from '@/component/product/ProductCard';
 import { useCart } from '@/context/CartContext';
 import { useSettings } from '@/context/SettingsContext';
-import { getProductsApi } from '@/lib/api/productApi';
-import { getCategoriesApi } from '@/lib/api/categoryApi';
+import { useCategories, useProducts } from '@/context/CatalogContext';
 import type { Product as ApiProduct, ProductCategory } from '@/lib/api/types';
 import { normalizeProductCategory } from '@/lib/api/types';
 
-// Metadata for this route lives in app/shop/layout.tsx (this file is a client component).
 
 interface ShopProduct {
     id: string;
@@ -33,8 +31,6 @@ interface ShopProduct {
 
 type SortKey = 'default' | 'price-asc' | 'price-desc' | 'rating';
 
-const HIDDEN_CATEGORIES = new Set(['testing', 'test']);
-
 const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
     { key: 'default', label: 'Featured' },
     { key: 'rating', label: 'Top rated' },
@@ -42,63 +38,52 @@ const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
     { key: 'price-desc', label: 'Price: high to low' },
 ];
 
-function ShopContent() {
+function toShopProduct(p: ApiProduct): ShopProduct {
+    return {
+        id: p._id,
+        name: p.name,
+        slug: p.slug,
+        category: p.category,
+        image: p.image,
+        images: p.images,
+        rating: p.rating,
+        reviews: p.reviews,
+        price: p.price,
+        originalPrice: p.originalPrice,
+        discount: p.discount,
+        weight: p.weight,
+        description: p.description,
+        freeDelivery: p.freeDelivery,
+    };
+}
+
+/**
+ * Shop grid. The server page passes the category and search from the URL, and the
+ * product list comes from the server-rendered catalogue, so the grid is in the HTML.
+ */
+export default function ShopClient({ initialCategory: initialCategoryParam, initialQuery }: { initialCategory: string; initialQuery: string }) {
     const router = useRouter();
-    const searchParams = useSearchParams();
     const { settings } = useSettings();
     const { addToCart } = useCart();
+    const { products: catalogProducts, loaded: productsLoaded } = useProducts();
+    const { categories: catalogCategories } = useCategories();
 
-    const initialCategory = normalizeProductCategory(searchParams.get('category') || 'all');
+    const initialCategory = normalizeProductCategory(initialCategoryParam || 'all');
     const [activeCategory, setActiveCategory] = useState(initialCategory);
-    const [query, setQuery] = useState(searchParams.get('search') || searchParams.get('q') || '');
+    const [query, setQuery] = useState(initialQuery);
     const [sortBy, setSortBy] = useState<SortKey>('default');
-    const [allProducts, setAllProducts] = useState<ShopProduct[]>([]);
-    const [categories, setCategories] = useState<Array<{ key: string; label: string }>>([{ key: 'all', label: 'All' }]);
-    const [loading, setLoading] = useState(true);
+    const allProducts = useMemo(() => catalogProducts.map(toShopProduct), [catalogProducts]);
+    const categories = useMemo(
+        () => [{ key: 'all', label: 'All' }, ...catalogCategories.map((cat) => ({ key: cat.slug, label: cat.name }))],
+        [catalogCategories],
+    );
+    const loading = !productsLoaded;
 
+    // Header search and footer category links navigate here; follow the new URL values.
     useEffect(() => {
-        setActiveCategory(normalizeProductCategory(searchParams.get('category') || 'all'));
-        setQuery(searchParams.get('search') || searchParams.get('q') || '');
-    }, [searchParams]);
-
-    useEffect(() => {
-        async function loadProducts() {
-            try {
-                const [response, categoryItems] = await Promise.all([getProductsApi({ limit: 100 }), getCategoriesApi()]);
-                const mapped: ShopProduct[] = response.items
-                    .filter((p) => p.isActive !== false && !HIDDEN_CATEGORIES.has(p.category))
-                    .map((p: ApiProduct) => ({
-                        id: p._id,
-                        name: p.name,
-                        slug: p.slug,
-                        category: p.category,
-                        image: p.image,
-                        images: p.images,
-                        rating: p.rating,
-                        reviews: p.reviews,
-                        price: p.price,
-                        originalPrice: p.originalPrice,
-                        discount: p.discount,
-                        weight: p.weight,
-                        description: p.description,
-                        freeDelivery: p.freeDelivery,
-                    }));
-                setAllProducts(mapped);
-                setCategories([
-                    { key: 'all', label: 'All' },
-                    ...categoryItems
-                        .filter((cat) => !HIDDEN_CATEGORIES.has(cat.slug))
-                        .map((cat) => ({ key: cat.slug, label: cat.name })),
-                ]);
-            } catch {
-                setAllProducts([]);
-                setCategories([{ key: 'all', label: 'All' }]);
-            } finally {
-                setLoading(false);
-            }
-        }
-        void loadProducts();
-    }, []);
+        setActiveCategory(normalizeProductCategory(initialCategoryParam || 'all'));
+        setQuery(initialQuery);
+    }, [initialCategoryParam, initialQuery]);
 
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -119,7 +104,7 @@ function ShopContent() {
 
     const selectCategory = (key: string) => {
         setActiveCategory(key);
-        const params = new URLSearchParams(searchParams.toString());
+        const params = new URLSearchParams(window.location.search);
         if (key === 'all') params.delete('category');
         else params.set('category', key);
         router.replace(`/shop${params.toString() ? `?${params.toString()}` : ''}`, { scroll: false });
@@ -127,7 +112,7 @@ function ShopContent() {
 
     const clearSearch = () => {
         setQuery('');
-        const params = new URLSearchParams(searchParams.toString());
+        const params = new URLSearchParams(window.location.search);
         params.delete('search');
         params.delete('q');
         router.replace(`/shop${params.toString() ? `?${params.toString()}` : ''}`, { scroll: false });
@@ -265,13 +250,5 @@ function ShopContent() {
                 )}
             </div>
         </main>
-    );
-}
-
-export default function ShopPage() {
-    return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-parchment text-ink/50">Loading...</div>}>
-            <ShopContent />
-        </Suspense>
     );
 }

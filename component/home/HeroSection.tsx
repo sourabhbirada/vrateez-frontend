@@ -1,9 +1,9 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ArrowRight, Leaf, WheatOff } from 'lucide-react';
-import { getBannersApi } from '@/lib/api/bannerApi';
+import { useCatalog } from '@/context/CatalogContext';
 import type { Banner } from '@/lib/api/types';
 import { resolveImage } from '@/lib/images';
 
@@ -146,35 +146,18 @@ function SattvicSeal() {
     );
 }
 
+function slidesFromBanners(banners: Banner[] | null | undefined): HeroSlide[] {
+    const mapped = (banners || []).map(mapBannerToSlide).filter((s) => s.title && (s.image || s.video));
+    return mapped.length > 0 ? mapped : FALLBACK_SLIDES;
+}
+
 export default function HeroSection() {
-    const [slides, setSlides] = useState<HeroSlide[]>(FALLBACK_SLIDES);
-    const [loading, setLoading] = useState(true);
+    // Banners come from the server-rendered catalogue, so the first slide is in the HTML
+    // and the hero never swaps from a placeholder to content (no layout shift).
+    const { banners } = useCatalog();
+    const slides = useMemo(() => slidesFromBanners(banners), [banners]);
     const [current, setCurrent] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
-
-    useEffect(() => {
-        let cancelled = false;
-        async function load() {
-            try {
-                const banners = await getBannersApi();
-                if (!cancelled) {
-                    const mapped = banners
-                        .map(mapBannerToSlide)
-                        .filter((s) => s.title && (s.image || s.video));
-                    setSlides(mapped.length > 0 ? mapped : FALLBACK_SLIDES);
-                    setCurrent(0);
-                }
-            } catch {
-                if (!cancelled) setSlides(FALLBACK_SLIDES);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        }
-        void load();
-        return () => {
-            cancelled = true;
-        };
-    }, []);
 
     const goTo = useCallback(
         (idx: number) => {
@@ -199,10 +182,6 @@ export default function HeroSection() {
         return () => clearInterval(timer);
     }, [next, slides.length]);
 
-    if (loading) {
-        return <section className="relative w-full min-h-[40vh] bg-parchment" />;
-    }
-
     if (!slides.length) return null;
 
     const slide = slides[current];
@@ -216,9 +195,10 @@ export default function HeroSection() {
                         <span className="inline-block font-label text-[10px] tracking-[0.22em] text-clay uppercase mb-6 border border-clay/30 rounded-full px-3 py-1">
                             {slide.tag}
                         </span>
-                        <h1 className="font-display italic text-4xl md:text-5xl lg:text-[3.3rem] text-ink leading-[1.08] mb-6 whitespace-pre-line tracking-[-0.01em]">
+                        {/* Slide titles rotate, so they are h2s; the page's single h1 is in HomePageClient. */}
+                        <h2 className="font-display italic text-4xl md:text-5xl lg:text-[3.3rem] text-ink leading-[1.08] mb-6 whitespace-pre-line tracking-[-0.01em]">
                             {slide.title}
-                        </h1>
+                        </h2>
                         <p className="text-[15px] text-ink/60 mb-7 leading-relaxed max-w-sm">{slide.subtitle}</p>
 
                         <div className="flex items-stretch gap-0 mb-7 bg-ink rounded-2xl px-6 py-4 w-fit shadow-lg shadow-ink/15 ring-1 ring-white/5">
@@ -269,12 +249,18 @@ export default function HeroSection() {
                             {slides.map((_, i) => (
                                 <button
                                     key={i}
+                                    type="button"
                                     onClick={() => goTo(i)}
-                                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                                        i === current ? 'bg-turmeric w-8' : 'bg-ink/15 w-1.5 hover:bg-ink/30'
-                                    }`}
-                                    aria-label={`Slide ${i + 1}`}
-                                />
+                                    className="group flex h-6 items-center px-1"
+                                    aria-label={`Show slide ${i + 1}`}
+                                    aria-current={i === current}
+                                >
+                                    <span
+                                        className={`block h-1.5 rounded-full transition-all duration-300 ${
+                                            i === current ? 'bg-turmeric w-8' : 'bg-ink/15 w-1.5 group-hover:bg-ink/30'
+                                        }`}
+                                    />
+                                </button>
                             ))}
                         </div>
                     </div>
@@ -303,10 +289,11 @@ export default function HeroSection() {
                             <Image
                                 key={slide.image}
                                 src={resolveImage(slide.image)}
-                                alt={slide.title}
+                                alt={slide.title.replace(/\s+/g, ' ')}
                                 fill
                                 className={`object-cover animate-kenburns ${slide.imagePosition}`}
-                                priority
+                                priority={current === 0}
+                                fetchPriority={current === 0 ? 'high' : 'auto'}
                                 sizes="(min-width: 768px) 58vw, 100vw"
                             />
                         ) : (

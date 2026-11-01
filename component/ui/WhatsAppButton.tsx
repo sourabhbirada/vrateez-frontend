@@ -3,14 +3,14 @@
 import { MessageCircle } from 'lucide-react';
 import { useSettings, whatsappLink } from '@/context/SettingsContext';
 
-const CHAT_WHATSAPP = '6375010189';
+const CHAT_WHATSAPP = '916375010189';
 
 export default function WhatsAppButton() {
   const { settings } = useSettings();
   const href =
     whatsappLink(settings?.contact?.whatsapp) ||
     whatsappLink(CHAT_WHATSAPP) ||
-    `https://wa.me/91${CHAT_WHATSAPP}?text=${encodeURIComponent("Hi Vrateez! I'd like to know more about your products.")}`;
+    `https://wa.me/${CHAT_WHATSAPP}?text=${encodeURIComponent("Hi Vrateez! I'd like to know more about your products.")}`;
 
   return (
     <a

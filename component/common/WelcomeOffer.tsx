@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, Copy, Check, MessageCircle, X } from 'lucide-react';
 import { useSettings } from '@/context/SettingsContext';
 import { trackLead } from '@/lib/analytics';
+import { activityTracker } from '@/lib/activityTracker';
 
 const SEEN_KEY = 'vrateez_welcome_seen_at';
 const SNOOZE_DAYS = 7;
@@ -13,7 +14,7 @@ const COUPON = process.env.NEXT_PUBLIC_WELCOME_COUPON || '';
 const COUPON_TEXT = process.env.NEXT_PUBLIC_WELCOME_COUPON_TEXT || '';
 
 /**
- * First-visit offer. Shows once per week, after 8 seconds or on exit intent.
+ * First-visit offer. Shows once per week, after the cookie choice, on half-page scroll, 25 seconds or exit intent.
  * With NEXT_PUBLIC_WELCOME_COUPON set it promotes that code (create it in the CMS first);
  * otherwise it pushes free delivery and the WhatsApp offers list.
  */
@@ -32,8 +33,10 @@ export default function WelcomeOffer() {
     if (seen && Date.now() - seen < SNOOZE_DAYS * 24 * 60 * 60 * 1000) return;
 
     let shown = false;
+    // Never stack the offer on top of the cookie banner: wait until the visitor has answered it.
+    const consentAnswered = () => activityTracker.getCookieConsent() !== null;
     const show = () => {
-      if (shown) return;
+      if (shown || !consentAnswered()) return;
       shown = true;
       setOpen(true);
       try {
@@ -42,13 +45,21 @@ export default function WelcomeOffer() {
         /* ignore */
       }
     };
-    const timer = window.setTimeout(show, 8000);
+    // Show after real engagement (half the page scrolled, or 25 seconds) or on exit intent,
+    // instead of a fixed 8 seconds that interrupts the first screen on phones.
+    const timer = window.setTimeout(show, 25_000);
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (max > 0 && window.scrollY / max >= 0.5) show();
+    };
     const onLeave = (e: MouseEvent) => {
       if (e.clientY <= 0) show();
     };
+    window.addEventListener('scroll', onScroll, { passive: true });
     document.addEventListener('mouseleave', onLeave);
     return () => {
       window.clearTimeout(timer);
+      window.removeEventListener('scroll', onScroll);
       document.removeEventListener('mouseleave', onLeave);
     };
   }, []);
@@ -82,7 +93,7 @@ export default function WelcomeOffer() {
         </button>
 
         <div className="relative h-40">
-          <Image src="/diwali-hero.jpg" alt="" fill className="object-cover" sizes="448px" priority />
+          <Image src="/diwali-hero.jpg" alt="Vrateez festive snack hamper" fill className="object-cover" sizes="448px" />
           <div className="absolute inset-0 bg-linear-to-t from-parchment via-parchment/20 to-transparent" />
         </div>
 

@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useCart } from '@/context/CartContext';
-import { getProductsApi } from '@/lib/api/productApi';
-import { getCategoriesApi } from '@/lib/api/categoryApi';
-import type { Category, Product } from '@/lib/api/types';
+import { useCategories, useProducts } from '@/context/CatalogContext';
+import type { Product } from '@/lib/api/types';
 import ProductCard from '@/component/product/ProductCard';
 
 type ProductView = {
@@ -41,36 +40,11 @@ function mapProduct(p: Product): ProductView {
 
 export default function ProductsSection() {
   const [activeCategory, setActiveCategory] = useState('all');
-  const [products, setProducts] = useState<ProductView[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { products: rawProducts, loaded: productsLoaded } = useProducts();
+  const { categories } = useCategories();
+  const products = useMemo(() => rawProducts.map(mapProduct), [rawProducts]);
+  const loading = !productsLoaded;
   const { addToCart } = useCart();
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const [productData, categoryData] = await Promise.all([
-          getProductsApi({ limit: 100 }),
-          getCategoriesApi(),
-        ]);
-        if (cancelled) return;
-        setProducts(productData.items.map(mapProduct));
-        setCategories(categoryData);
-      } catch {
-        if (!cancelled) {
-          setProducts([]);
-          setCategories([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const filters = [
     { key: 'all', label: 'All' },

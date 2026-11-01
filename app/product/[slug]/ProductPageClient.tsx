@@ -2,8 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { notFound, useParams } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import {
     ArrowRight,
     Banknote,
@@ -23,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useSettings } from '@/context/SettingsContext';
-import { getProductBySlugApi, getProductsApi } from '@/lib/api/productApi';
+import { useProducts } from '@/context/CatalogContext';
 import type { Product as ApiProduct, ProductCategory } from '@/lib/api/types';
 import { getProductCategoryLabel } from '@/lib/api/types';
 import { getEffectiveUnitPrice, getPackLabel, getPackTotal, type PackOption } from '@/lib/packPricing';
@@ -136,67 +135,37 @@ function PackChoice({
     );
 }
 
-export default function ProductPage() {
-    const params = useParams();
-    const slug = params.slug as string;
-    const [product, setProduct] = useState<ProductView | null>(null);
-    const [allProducts, setAllProducts] = useState<ProductView[]>([]);
-    const [loading, setLoading] = useState(true);
+function defaultSelections(p: ApiProduct): Record<string, string> {
+    const defaults: Record<string, string> = {};
+    p.customization?.options?.forEach((opt) => {
+        defaults[opt.key] = opt.type === 'select' && opt.choices?.[0] ? opt.choices[0].value : '';
+    });
+    return defaults;
+}
+
+/**
+ * Product detail. The server page loads the product and passes it in, so the name,
+ * price, description and ingredients are in the HTML on first load.
+ */
+export default function ProductPageClient({ apiProduct }: { apiProduct: ApiProduct }) {
+    const product = useMemo(() => mapApiProductToView(apiProduct), [apiProduct]);
+    const { products: catalogProducts } = useProducts();
+    const allProducts = useMemo(() => catalogProducts.map(mapApiProductToView), [catalogProducts]);
     const { addToCart } = useCart();
     const { settings } = useSettings();
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [selectedPackUnits, setSelectedPackUnits] = useState(1);
     const [activeTab, setActiveTab] = useState<DetailTab>('description');
-    const [customSelections, setCustomSelections] = useState<Record<string, string>>({});
+    const [customSelections, setCustomSelections] = useState<Record<string, string>>(() => defaultSelections(apiProduct));
     const [customError, setCustomError] = useState('');
     const [added, setAdded] = useState(false);
 
     useEffect(() => {
-        async function loadProduct() {
-            try {
-                setLoading(true);
-                const [apiProduct, apiList] = await Promise.all([
-                    getProductBySlugApi(slug),
-                    getProductsApi({ limit: 100 }),
-                ]);
-
-                setProduct(mapApiProductToView(apiProduct));
-                trackViewItem({ id: apiProduct._id, name: apiProduct.name, price: apiProduct.price, category: apiProduct.category });
-                setAllProducts(apiList.items.map(mapApiProductToView));
-                const defaults: Record<string, string> = {};
-                apiProduct.customization?.options?.forEach((opt) => {
-                    if (opt.type === 'select' && opt.choices?.[0]) {
-                        defaults[opt.key] = opt.choices[0].value;
-                    } else {
-                        defaults[opt.key] = '';
-                    }
-                });
-                setCustomSelections(defaults);
-            } catch (error) {
-                console.error('Error loading product:', error);
-                setProduct(null);
-                setAllProducts([]);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        void loadProduct();
-    }, [slug]);
-
-    if (loading) {
-        return (
-            <main className="min-h-screen bg-parchment flex flex-col items-center justify-center gap-3 text-ink/50">
-                <span className="h-10 w-10 rounded-full border-2 border-turmeric/30 border-t-turmeric animate-spin" />
-                <p className="text-sm">Loading product…</p>
-            </main>
-        );
-    }
-
-    if (!product) {
-        return notFound();
-    }
+        trackViewItem({ id: apiProduct._id, name: apiProduct.name, price: apiProduct.price, category: apiProduct.category });
+        setCustomSelections(defaultSelections(apiProduct));
+        setSelectedImage(0);
+    }, [apiProduct]);
 
     const hasPackOptions = (product.packOptions?.length ?? 0) > 0;
     const customizationEnabled = Boolean(product.customization?.enabled && product.customization.options?.length);
@@ -371,7 +340,7 @@ export default function ProductPage() {
                                             i === selectedImage ? 'ring-turmeric' : 'ring-transparent hover:ring-ink/20'
                                         }`}
                                     >
-                                        <Image src={resolveImage(img)} alt="" fill sizes="80px" className="object-cover" />
+                                        <Image src={resolveImage(img)} alt={`${product.name}, photo ${i + 1}`} fill sizes="80px" className="object-cover" />
                                     </button>
                                 ))}
                             </div>

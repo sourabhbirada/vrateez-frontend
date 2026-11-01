@@ -2,10 +2,10 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { BadgeCheck, Wheat, Tag, FlaskConical, Sprout, Ban } from 'lucide-react';
-import { getCategoriesApi } from '@/lib/api/categoryApi';
+import { useCategories } from '@/context/CatalogContext';
 import { useSettings } from '@/context/SettingsContext';
 import type { Category } from '@/lib/api/types';
 import { resolveImage } from '@/lib/images';
@@ -105,26 +105,8 @@ function mapCategoriesToCards(categories: Category[]): CategoryCardItem[] {
 }
 
 export default function OurProductsSection() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const { categories, loaded } = useCategories();
   const { settings } = useSettings();
-
-  useEffect(() => {
-    let cancelled = false;
-    getCategoriesApi()
-      .then((items) => {
-        if (!cancelled) setCategories(items);
-      })
-      .catch(() => {
-        if (!cancelled) setCategories([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoaded(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const cards: CategoryCardItem[] = useMemo(() => {
     if (!loaded) return FALLBACK_CATEGORY_CARDS;

@@ -143,7 +143,7 @@ export default function AboutUs() {
           <FadeIn delay={0.2}>
             <div className="mt-14 max-w-2xl mx-auto rounded-2xl border border-turmeric/20 bg-white/60 backdrop-blur px-8 py-8 text-center">
               <p className="font-label text-sm text-clay tracking-widest uppercase mb-4">Bhagavad Gita — Chapter 17, Verse 8</p>
-              <p className="font-display text-2xl md:text-3xl text-clay leading-snug mb-5">
+              <p lang="sa" className="font-display text-2xl md:text-3xl text-clay leading-snug mb-5">
                 &quot;आयुः सत्त्वबलारोग्यसुखप्रीतिविवर्धनाः।<br />
                 रस्याः स्निग्धाः स्थिरा हृद्या आहाराः सात्त्विकप्रियाः॥&quot;
               </p>

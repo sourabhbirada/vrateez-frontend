@@ -1,11 +1,11 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Check, Gift, Package, ShoppingBag, Truck } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useSettings } from '@/context/SettingsContext';
-import { getProductsApi } from '@/lib/api/productApi';
+import { useProducts } from '@/context/CatalogContext';
 import type { Product } from '@/lib/api/types';
 import { resolveImage } from '@/lib/images';
 import { formatInr } from '@/lib/orderUtils';
@@ -39,22 +39,8 @@ export default function BundlesSection() {
   const { addToCart, openCart } = useCart();
   const { settings } = useSettings();
   const threshold = settings?.shipping?.freeShippingThreshold ?? 499;
-  const [products, setProducts] = useState<Product[]>([]);
+  const { products } = useProducts();
   const [added, setAdded] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    getProductsApi({ limit: 100 })
-      .then((res) => {
-        if (!cancelled) setProducts(res.items);
-      })
-      .catch(() => {
-        if (!cancelled) setProducts([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const boxes = useMemo(() => {
     const bySlug = new Map(products.filter((p) => p.isActive !== false).map((p) => [p.slug, p]));

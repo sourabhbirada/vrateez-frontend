@@ -46,8 +46,8 @@ export default function CookieConsent() {
 			<p className="mt-2 text-[13px] leading-relaxed text-ink/60">
 				We use cookies to keep your cart, understand what people browse and make the shop better. Accept to help us,
 				or reject and only the essentials stay.{" "}
-				<Link href="/faq" className="font-semibold text-ink/70 underline decoration-ink/20 underline-offset-4 transition hover:text-ink">
-					Learn more
+				<Link href="/privacy-policy" className="font-semibold text-ink/70 underline decoration-ink/20 underline-offset-4 transition hover:text-ink">
+					Read our privacy policy
 				</Link>
 			</p>
 

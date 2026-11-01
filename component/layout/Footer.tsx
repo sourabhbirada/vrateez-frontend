@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
 import {
   Instagram,
   Facebook,
@@ -15,9 +14,8 @@ import {
   MessageCircle,
   Check,
 } from 'lucide-react';
-import { getCategoriesApi } from '@/lib/api/categoryApi';
+import { useCategories } from '@/context/CatalogContext';
 import { useSettings, whatsappLink } from '@/context/SettingsContext';
-import type { Category } from '@/lib/api/types';
 
 const DEFAULT_CATEGORIES = [
   { label: 'Cookies', href: '/shop?category=cookies' },
@@ -44,10 +42,12 @@ const WHY_VRATEEZ = [
   'FSSAI certified kitchen',
 ];
 
-const BOTTOM_LINKS = [
-  { href: '/faq', label: 'FAQ' },
-  { href: '/track-order', label: 'Track order' },
-  { href: '/bulk-order', label: 'Bulk order' },
+const POLICY_LINKS = [
+  { href: '/contact', label: 'Contact' },
+  { href: '/shipping-policy', label: 'Shipping' },
+  { href: '/refund-policy', label: 'Returns & refunds' },
+  { href: '/privacy-policy', label: 'Privacy' },
+  { href: '/terms', label: 'Terms' },
 ];
 
 const FALLBACK_WHATSAPP = '916375010189';
@@ -55,21 +55,7 @@ const OPT_IN_MESSAGE = 'Hi Vrateez! Please add me to your WhatsApp list for new 
 
 export default function Footer() {
   const { settings } = useSettings();
-  const [categories, setCategories] = useState<Category[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    getCategoriesApi()
-      .then((items) => {
-        if (!cancelled) setCategories(items);
-      })
-      .catch(() => {
-        if (!cancelled) setCategories([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { categories } = useCategories();
 
   const contact = settings?.contact;
   const social = settings?.socialMedia;
@@ -218,7 +204,7 @@ export default function Footer() {
           {/* Link columns */}
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-10 lg:col-span-8">
             <div>
-              <h4 className="mb-5 font-label text-[10px] font-bold uppercase tracking-[0.2em] text-millet">Shop</h4>
+              <p className="mb-5 font-label text-[10px] font-bold uppercase tracking-[0.2em] text-millet">Shop</p>
               <nav className="space-y-2.5" aria-label="Shop by category">
                 <Link href="/shop" className={linkClass}>
                   All products
@@ -234,7 +220,7 @@ export default function Footer() {
             </div>
 
             <div>
-              <h4 className="mb-5 font-label text-[10px] font-bold uppercase tracking-[0.2em] text-millet">Company</h4>
+              <p className="mb-5 font-label text-[10px] font-bold uppercase tracking-[0.2em] text-millet">Company</p>
               <nav className="space-y-2.5" aria-label="Company">
                 {COMPANY_LINKS.map((item) => (
                   <Link key={item.href} href={item.href} className={`${linkClass} block`}>
@@ -246,7 +232,7 @@ export default function Footer() {
             </div>
 
             <div className="col-span-2 sm:col-span-1">
-              <h4 className="mb-5 font-label text-[10px] font-bold uppercase tracking-[0.2em] text-millet">Why Vrateez</h4>
+              <p className="mb-5 font-label text-[10px] font-bold uppercase tracking-[0.2em] text-millet">Why Vrateez</p>
               <ul className="space-y-2.5 text-sm text-parchment/60">
                 {WHY_VRATEEZ.map((line) => (
                   <li key={line} className="flex items-start gap-2.5">
@@ -290,8 +276,8 @@ export default function Footer() {
           </p>
           <div className="flex flex-col items-center justify-between gap-3 text-xs text-parchment/35 sm:flex-row">
             <p>&copy; {new Date().getFullYear()} Vrateez Foods Pvt. Ltd. All rights reserved.</p>
-            <nav className="flex items-center gap-4" aria-label="Footer">
-              {BOTTOM_LINKS.map((item) => (
+            <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2" aria-label="Policies">
+              {POLICY_LINKS.map((item) => (
                 <Link key={item.href} href={item.href} className="transition hover:text-parchment">
                   {item.label}
                 </Link>

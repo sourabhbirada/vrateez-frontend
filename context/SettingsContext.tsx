@@ -14,11 +14,19 @@ const SettingsContext = createContext<SettingsContextType>({
   loading: true,
 });
 
-export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [loading, setLoading] = useState(true);
+export function SettingsProvider({
+  children,
+  initialSettings = null,
+}: {
+  children: ReactNode;
+  /** Settings fetched on the server by the root layout, so pages render without waiting. */
+  initialSettings?: SiteSettings | null;
+}) {
+  const [settings, setSettings] = useState<SiteSettings | null>(initialSettings);
+  const [loading, setLoading] = useState(!initialSettings);
 
   useEffect(() => {
+    if (initialSettings) return;
     let cancelled = false;
     async function load() {
       try {
@@ -34,7 +42,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initialSettings]);
 
   return (
     <SettingsContext.Provider value={{ settings, loading }}>

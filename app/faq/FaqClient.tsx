@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, ChevronDown, Mail, MessageCircle } from 'lucide-react';
-import { getFaqsApi } from '@/lib/api/faqApi';
 import type { Faq } from '@/lib/api/types';
 import { useSettings, whatsappLink } from '@/context/SettingsContext';
 
@@ -52,35 +51,18 @@ function HelpCard({ wa, email }: { wa: string | null; email?: string }) {
     );
 }
 
-export default function FaqPage() {
-    const [faqs, setFaqs] = useState<Faq[]>([]);
-    const [activeCategory, setActiveCategory] = useState<string>('');
-    const [openId, setOpenId] = useState<string | null>(null);
-    const [loaded, setLoaded] = useState(false);
+/**
+ * FAQ page body. Questions come from the server page (CMS FAQs, or the built-in set when
+ * the CMS is empty), so every question and answer is in the HTML.
+ */
+export default function FaqClient({ initialFaqs }: { initialFaqs: Faq[] }) {
+    const faqs = initialFaqs;
+    const [activeCategory, setActiveCategory] = useState<string>(initialFaqs[0]?.category ?? '');
+    const [openId, setOpenId] = useState<string | null>(initialFaqs[0]?._id ?? null);
+    const loaded = true;
     const { settings } = useSettings();
     const wa = whatsappLink(settings?.contact?.whatsapp, 'Hi Vrateez! I have a question the FAQ did not answer.');
     const email = settings?.contact?.supportEmail;
-
-    useEffect(() => {
-        async function loadFaqs() {
-            try {
-                const items = await getFaqsApi();
-                const ordered = [...items].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-                setFaqs(ordered);
-                if (ordered.length) {
-                    setActiveCategory(ordered[0].category);
-                    setOpenId(ordered[0]._id);
-                }
-            } catch {
-                setFaqs([]);
-                setActiveCategory('');
-            } finally {
-                setLoaded(true);
-            }
-        }
-
-        void loadFaqs();
-    }, []);
 
     const groups = useMemo<FaqGroup[]>(() => {
         const byKey = new Map<string, FaqGroup>();

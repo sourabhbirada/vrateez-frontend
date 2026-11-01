@@ -6,6 +6,7 @@ export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, string> = {
   "energy-on-the-go": "Energy on the Go",
   "savory-snacks": "Savory Snacks",
   "wholesome-delights": "Wholesome Delights",
+  gifts: "Gift Hampers",
 };
 
 const PRODUCT_CATEGORY_ALIASES: Record<string, ProductCategory> = {

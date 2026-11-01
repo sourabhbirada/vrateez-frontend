@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Check, Gift, Heart, Leaf, Minus, Package, Plus, ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useSettings } from '@/context/SettingsContext';
-import { getDealsApi } from '@/lib/api/dealApi';
-import { getProductBySlugApi } from '@/lib/api/productApi';
+import { useCatalog, useProducts } from '@/context/CatalogContext';
 import type { Deal, Product } from '@/lib/api/types';
 import { resolveImage } from '@/lib/images';
 
@@ -47,40 +46,14 @@ const TRUST = [
 
 export default function DiwaliPage() {
   const [quantity, setQuantity] = useState(1);
-  const [deal, setDeal] = useState<Deal | null>(null);
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
   const [added, setAdded] = useState(false);
   const { addToCart, toggleCart } = useCart();
   const { settings } = useSettings();
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const deals = await getDealsApi('landing');
-        const active = deals[0] || FALLBACK_LANDING_DEAL;
-        if (cancelled) return;
-        setDeal(active);
-        if (active?.productSlug) {
-          try {
-            const p = await getProductBySlugApi(active.productSlug);
-            if (!cancelled) setProduct(p);
-          } catch {
-            if (!cancelled) setProduct(null);
-          }
-        }
-      } catch {
-        if (!cancelled) setDeal(FALLBACK_LANDING_DEAL);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // Deal and product come from the server-rendered catalogue, so the offer is in the HTML.
+  const { landingDeals } = useCatalog();
+  const { products } = useProducts();
+  const deal: Deal | null = landingDeals && landingDeals.length ? landingDeals[0] : FALLBACK_LANDING_DEAL;
+  const product: Product | null = (deal?.productSlug && products.find((p) => p.slug === deal.productSlug)) || null;
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -99,14 +72,6 @@ export default function DiwaliPage() {
     toggleCart();
     window.setTimeout(() => setAdded(false), 1400);
   };
-
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-ink flex items-center justify-center">
-        <p className="text-parchment/50 text-sm font-label tracking-widest uppercase">Loading offer…</p>
-      </main>
-    );
-  }
 
   if (!deal) {
     return (
