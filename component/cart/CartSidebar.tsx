@@ -54,7 +54,7 @@ export default function CartSidebar() {
                 aria-modal="true"
                 aria-label="Shopping cart"
                 aria-hidden={!isOpen}
-                className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-parchment text-ink shadow-[-24px_0_60px_-30px_rgba(36,31,22,0.55)] transition-[transform,visibility] duration-300 ease-out ${
+                className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-cream text-ink shadow-[-24px_0_60px_-30px_rgba(36,31,22,0.55)] transition-[transform,visibility] duration-300 ease-out ${
                     isOpen ? 'visible translate-x-0' : 'pointer-events-none invisible translate-x-full'
                 }`}
             >
@@ -92,7 +92,7 @@ export default function CartSidebar() {
                         <Link
                             href="/shop"
                             onClick={closeCart}
-                            className="pressable mt-7 inline-flex items-center gap-2 rounded-full bg-turmeric px-7 py-3.5 text-sm font-semibold text-parchment shadow-lg shadow-turmeric/25 transition hover:bg-clay"
+                            className="pressable mt-7 inline-flex items-center gap-2 rounded-full bg-rust px-7 py-3.5 text-sm font-semibold text-parchment shadow-lg shadow-rust/25 transition hover:bg-clay"
                         >
                             Shop now
                             <ArrowRight size={15} />
@@ -109,7 +109,7 @@ export default function CartSidebar() {
                     <>
                         {/* Free delivery progress */}
                         <div className="px-6 pt-4">
-                            <div className="rounded-2xl bg-white px-4 py-3 ring-1 ring-ink/[0.08]">
+                            <div className="rounded-2xl bg-sage/50 px-4 py-3 ring-1 ring-basil/10">
                                 <div className="flex items-center justify-between gap-3 text-xs">
                                     <span className={`inline-flex items-center gap-1.5 font-medium ${unlocked ? 'text-basil' : 'text-ink/70'}`}>
                                         {unlocked ? <Check size={14} strokeWidth={2.5} /> : <Truck size={14} />}
@@ -132,7 +132,7 @@ export default function CartSidebar() {
                                     aria-label="Progress to free delivery"
                                 >
                                     <div
-                                        className={`h-full rounded-full transition-[width] duration-500 ease-out ${unlocked ? 'bg-basil' : 'bg-turmeric'}`}
+                                        className={`h-full rounded-full transition-[width] duration-500 ease-out ${unlocked ? 'bg-basil' : 'bg-rust'}`}
                                         style={{ width: `${progress}%` }}
                                     />
                                 </div>
@@ -150,12 +150,12 @@ export default function CartSidebar() {
                                     return (
                                         <li
                                             key={item.id}
-                                            className="flex gap-3.5 rounded-[22px] bg-white p-3 ring-1 ring-ink/[0.08]"
+                                            className="flex gap-3.5 rounded-[22px] bg-[#FFFCF7] ring-1 ring-[#EBDDCB] p-3"
                                         >
                                             <Link
                                                 href={href}
                                                 onClick={closeCart}
-                                                className="relative h-[76px] w-[76px] shrink-0 overflow-hidden rounded-2xl bg-[#EFE6D3]"
+                                                className="relative h-[76px] w-[76px] shrink-0 overflow-hidden rounded-2xl bg-peach/60"
                                             >
                                                 <Image
                                                     src={resolveImage(item.image)}
@@ -193,7 +193,7 @@ export default function CartSidebar() {
 
                                                 <div className="mt-2.5 flex items-center justify-between gap-3">
                                                     {/* Quantity stepper */}
-                                                    <div className="inline-flex items-center rounded-full bg-parchment/70 ring-1 ring-ink/15">
+                                                    <div className="inline-flex items-center rounded-full bg-white ring-1 ring-[#E6D6C2]">
                                                         <button
                                                             type="button"
                                                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -238,7 +238,7 @@ export default function CartSidebar() {
                         </div>
 
                         {/* Footer */}
-                        <div className="border-t border-ink/[0.08] bg-white/50 px-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+                        <div className="border-t border-[#EBDDCB] bg-[#FFFCF7] px-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
                             <div className="flex items-baseline justify-between">
                                 <span className="text-sm text-ink/60">Subtotal</span>
                                 <span className="font-display text-2xl text-ink">{formatInr(totalPrice)}</span>
@@ -247,7 +247,7 @@ export default function CartSidebar() {
                             <Link
                                 href="/checkout"
                                 onClick={closeCart}
-                                className="group pressable mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-turmeric py-4 text-sm font-semibold text-parchment shadow-lg shadow-turmeric/25 transition hover:bg-clay"
+                                className="group pressable mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-rust py-4 text-sm font-semibold text-parchment shadow-lg shadow-rust/25 transition hover:bg-clay"
                             >
                                 Checkout
                                 <span className="text-parchment/70">·</span>

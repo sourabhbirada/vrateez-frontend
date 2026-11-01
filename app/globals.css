@@ -16,6 +16,14 @@
   --color-basil: #26362A;
   --color-millet: #E4A93D;
   --color-clay: #9C4221;
+
+  /* Lighter storefront palette from the 2026 section designs (hero F1, why C2, hamper B3). */
+  --color-cream: #FBF6EF;
+  --color-peach: #FCE9DD;
+  --color-butter: #FFF3DD;
+  --color-sage: #DCE4D2;
+  --color-saffron: #E35A17;
+  --color-rust: #B9441F;
 }
 
 * {

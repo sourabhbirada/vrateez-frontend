@@ -2,8 +2,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { ArrowRight, Leaf, WheatOff } from 'lucide-react';
-import { useCatalog } from '@/context/CatalogContext';
+import { ArrowRight, Leaf, ShieldCheck, Star, WheatOff } from 'lucide-react';
+import { useCatalog, useProducts } from '@/context/CatalogContext';
 import type { Banner } from '@/lib/api/types';
 import { resolveImage } from '@/lib/images';
 
@@ -25,9 +25,8 @@ const FALLBACK_SLIDES: HeroSlide[] = [
         imagePosition: 'object-cover object-center',
         tag: 'Diwali Special · Limited Time',
         title: 'Gift hamper that\nlights up Diwali.',
-        subtitle:
-            'Energy bars, millet cookies and bites with decorative diyas and a greeting card — healthy gifting at a festive price.',
-        cta: 'Order the hamper',
+        subtitle: 'Healthy treats, decorative diyas and a festive greeting card, all wrapped in warmth.',
+        cta: 'Order hamper now',
         href: '/diwali',
         macros: [
             { value: '₹379', label: 'Special Price' },
@@ -40,8 +39,7 @@ const FALLBACK_SLIDES: HeroSlide[] = [
         imagePosition: 'object-[70%_38%]',
         tag: 'High Protein · Vrat Friendly',
         title: 'Protein that\nfits your fast.',
-        subtitle:
-            'Millet-based protein cookies built for real training days — clean label, no compromise.',
+        subtitle: 'Millet-based protein cookies built for real training days. Clean label, no compromise.',
         cta: 'Shop protein cookies',
         href: '/shop?category=cookies',
         macros: [
@@ -55,8 +53,7 @@ const FALLBACK_SLIDES: HeroSlide[] = [
         imagePosition: 'object-cover object-center',
         tag: 'Energy on the Go',
         title: 'Fuel for\nthe long fast.',
-        subtitle:
-            'Nut and seed energy bars with slow-release carbs — steady energy through vrat, workouts and travel. No crash.',
+        subtitle: 'Nut and seed energy bars with slow-release carbs. Steady energy through vrat, workouts and travel.',
         cta: 'Shop energy bars',
         href: '/shop?category=energy-on-the-go',
         macros: [
@@ -70,8 +67,7 @@ const FALLBACK_SLIDES: HeroSlide[] = [
         imagePosition: 'object-cover object-center',
         tag: 'Corporate & Festive Gifting',
         title: 'Gifts that nourish,\nnot just please.',
-        subtitle:
-            'Custom hampers for teams, clients and family — vrat-friendly, zero added sugar, beautifully packed, delivered pan-India.',
+        subtitle: 'Custom hampers for teams, clients and family. Vrat friendly, zero added sugar, delivered pan-India.',
         cta: 'Plan a bulk order',
         href: '/bulk-order',
         macros: [
@@ -83,9 +79,13 @@ const FALLBACK_SLIDES: HeroSlide[] = [
 ];
 
 const FEATURES = [
-    { icon: Leaf, label: 'No Onion, No Garlic' },
-    { icon: WheatOff, label: 'Gluten Free' },
+    { icon: Leaf, label: 'No onion, no garlic' },
+    { icon: WheatOff, label: 'Gluten free' },
+    { icon: ShieldCheck, label: 'FSSAI certified' },
 ];
+
+/** Small round photo that overlaps the hero card (design F1). */
+const INSET_IMAGE = '/virteez/Energy bar with packaging.jpeg';
 
 function mapBannerToSlide(banner: Banner): HeroSlide {
     const macros =
@@ -110,54 +110,79 @@ function mapBannerToSlide(banner: Banner): HeroSlide {
     };
 }
 
-function SattvicSeal() {
-    return (
-        <div className="relative w-28 h-28 md:w-36 md:h-36 shrink-0">
-            <div className="absolute inset-0 scale-125 rounded-full bg-ink/25 blur-2xl" aria-hidden="true" />
-
-            <svg
-                viewBox="0 0 200 200"
-                className="relative w-full h-full motion-safe:animate-[spin_28s_linear_infinite] drop-shadow-xl"
-                style={{ animationDirection: 'reverse' }}
-            >
-                <defs>
-                    <path id="sealArc" d="M 100,100 m -78,0 a 78,78 0 1,1 156,0 a 78,78 0 1,1 -156,0" />
-                </defs>
-                <circle cx="100" cy="100" r="96" fill="#E4A93D" />
-                <circle cx="100" cy="100" r="96" fill="none" stroke="#241F16" strokeWidth="1.5" strokeOpacity="0.15" />
-                <circle cx="100" cy="100" r="78" fill="none" stroke="#241F16" strokeWidth="1" strokeDasharray="2 4" />
-                <text fill="#241F16" fontSize="13" fontFamily="var(--font-mono, monospace)" letterSpacing="2">
-                    <textPath href="#sealArc" startOffset="0%">
-                        · HIGH PROTEIN · VRAT FRIENDLY · CLEAN LABEL
-                    </textPath>
-                </text>
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-[62%] h-[62%] rounded-full bg-ink flex flex-col items-center justify-center text-parchment text-center leading-none shadow-inner">
-                    <span className="font-display italic text-lg md:text-xl">100%</span>
-                    <span className="font-label text-[7px] md:text-[8px] tracking-[0.15em] uppercase mt-1">
-                        Certified
-                        <br />
-                        Clean
-                    </span>
-                </div>
-            </div>
-        </div>
-    );
-}
-
 function slidesFromBanners(banners: Banner[] | null | undefined): HeroSlide[] {
     const mapped = (banners || []).map(mapBannerToSlide).filter((s) => s.title && (s.image || s.video));
     return mapped.length > 0 ? mapped : FALLBACK_SLIDES;
+}
+
+/**
+ * Two-line titles get the highlighter stroke from the design on the second line,
+ * except its last word: "Gift hamper that / [lights up] Diwali."
+ */
+function TitleWithHighlight({ title }: { title: string }) {
+    const lines = title
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean);
+    if (lines.length < 2) return <>{title}</>;
+    const [first, ...rest] = lines;
+    const words = rest.join(' ').split(/\s+/);
+    const lead = words.length > 1 ? words.slice(0, -1).join(' ') : words.join(' ');
+    const last = words.length > 1 ? words[words.length - 1] : '';
+    return (
+        <>
+            {first}
+            <br />
+            <span className="-mx-1 box-decoration-clone bg-[linear-gradient(transparent_60%,rgba(255,196,128,0.8)_60%,rgba(255,196,128,0.8)_90%,transparent_90%)] px-1">
+                {lead}
+            </span>
+            {last ? <> {last}</> : null}
+        </>
+    );
+}
+
+/** Price or stat card: the first value large, the rest as chips. "You Save ₹120" reads as "Save ₹120". */
+function MacroCard({ macros }: { macros: HeroSlide['macros'] }) {
+    if (!macros.length) return null;
+    const [lead, ...rest] = macros;
+    const leadIsPrice = lead.value.trim().startsWith('₹');
+    return (
+        <div className="inline-flex max-w-full flex-wrap items-center gap-x-5 gap-y-3 rounded-[22px] bg-white px-6 py-4 shadow-[0_18px_40px_-24px_rgba(36,31,22,0.35)] ring-1 ring-ink/[0.06]">
+            <span className="flex items-baseline gap-2">
+                <span className="font-display text-4xl font-semibold leading-none text-ink md:text-[2.6rem]">{lead.value}</span>
+                {leadIsPrice ? null : <span className="text-sm text-ink/55">{lead.label.toLowerCase()}</span>}
+            </span>
+            {rest.map((m, i) =>
+                /save/i.test(m.label) ? (
+                    <span key={`${m.label}-${i}`} className="rounded-full bg-sage px-3 py-1.5 text-sm font-semibold text-basil">
+                        Save {m.value}
+                    </span>
+                ) : (
+                    <span key={`${m.label}-${i}`} className="text-sm font-medium text-ink/65">
+                        {m.value} {m.label.toLowerCase()}
+                        {/^items?$/i.test(m.label) ? ' inside' : ''}
+                    </span>
+                ),
+            )}
+        </div>
+    );
 }
 
 export default function HeroSection() {
     // Banners come from the server-rendered catalogue, so the first slide is in the HTML
     // and the hero never swaps from a placeholder to content (no layout shift).
     const { banners } = useCatalog();
+    const { products } = useProducts();
     const slides = useMemo(() => slidesFromBanners(banners), [banners]);
     const [current, setCurrent] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
+
+    const { avgRating, totalReviews } = useMemo(() => {
+        const rated = products.filter((p) => p.reviews > 0);
+        const reviews = rated.reduce((n, p) => n + p.reviews, 0);
+        const avg = reviews ? rated.reduce((n, p) => n + p.rating * p.reviews, 0) / reviews : 0;
+        return { avgRating: avg, totalReviews: reviews };
+    }, [products]);
 
     const goTo = useCallback(
         (idx: number) => {
@@ -168,84 +193,80 @@ export default function HeroSection() {
                 setTimeout(() => setIsAnimating(false), 50);
             }, 350);
         },
-        [isAnimating, slides.length]
+        [isAnimating, slides.length],
     );
 
-    const next = useCallback(
-        () => goTo((current + 1) % slides.length),
-        [current, goTo, slides.length]
-    );
+    const next = useCallback(() => goTo((current + 1) % slides.length), [current, goTo, slides.length]);
 
     useEffect(() => {
         if (slides.length < 2) return;
-        const timer = setInterval(next, 5000);
+        const timer = setInterval(next, 6000);
         return () => clearInterval(timer);
     }, [next, slides.length]);
 
     if (!slides.length) return null;
 
     const slide = slides[current];
-    const contentAnim = isAnimating ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0';
+    const contentAnim = isAnimating ? 'opacity-0 translate-y-3' : 'opacity-100 translate-y-0';
 
     return (
-        <section className="relative w-full overflow-hidden bg-parchment">
-            <div className="grid md:grid-cols-[minmax(0,42%)_1fr]">
-                <div className="relative flex flex-col justify-center px-8 md:px-14 py-14 md:py-0 order-2 md:order-1 overflow-hidden">
-                    <div className={`relative max-w-md transition-all duration-500 ease-out ${contentAnim}`}>
-                        <span className="inline-block font-label text-[10px] tracking-[0.22em] text-clay uppercase mb-6 border border-clay/30 rounded-full px-3 py-1">
-                            {slide.tag}
-                        </span>
-                        {/* Slide titles rotate, so they are h2s; the page's single h1 is in HomePageClient. */}
-                        <h2 className="font-display italic text-4xl md:text-5xl lg:text-[3.3rem] text-ink leading-[1.08] mb-6 whitespace-pre-line tracking-[-0.01em]">
-                            {slide.title}
-                        </h2>
-                        <p className="text-[15px] text-ink/60 mb-7 leading-relaxed max-w-sm">{slide.subtitle}</p>
+        <section className="relative overflow-hidden bg-cream">
+            {/* Soft peach and sage washes from the design: plain gradients, no blur filters. */}
+            <div
+                className="pointer-events-none absolute inset-0"
+                aria-hidden="true"
+                style={{
+                    background:
+                        'radial-gradient(60% 70% at 85% 10%, rgba(252,222,200,0.75) 0%, transparent 70%), radial-gradient(45% 55% at 0% 100%, rgba(214,228,205,0.7) 0%, transparent 70%)',
+                }}
+            />
 
-                        <div className="flex items-stretch gap-0 mb-7 bg-ink rounded-2xl px-6 py-4 w-fit shadow-lg shadow-ink/15 ring-1 ring-white/5">
-                            {slide.macros.map((m, i) => (
-                                <div
-                                    key={`${m.label}-${i}`}
-                                    className={`flex flex-col items-center px-5 ${i > 0 ? 'border-l border-parchment/15' : ''}`}
-                                >
-                                    <span className="font-display text-2xl md:text-3xl text-millet leading-none">
-                                        {m.value}
-                                    </span>
-                                    <span className="font-label text-[9px] tracking-[0.15em] uppercase text-parchment/60 mt-1.5">
-                                        {m.label}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
+            <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-5 pb-16 pt-10 md:px-8 md:pb-20 md:pt-14 lg:grid-cols-2 lg:gap-14">
+                {/* Copy */}
+                <div className={`min-w-0 transition-all duration-500 ease-out ${contentAnim}`}>
+                    <span className="inline-block rounded-full bg-peach px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/80">
+                        {slide.tag}
+                    </span>
+                    {/* Slide titles rotate, so they are h2s; the page's single h1 is in HomePageClient. */}
+                    <h2 className="mt-6 text-balance font-display text-[2.6rem] font-semibold leading-[1.04] tracking-[-0.02em] text-ink sm:text-6xl lg:text-[4.1rem]">
+                        <TitleWithHighlight title={slide.title} />
+                    </h2>
+                    <p className="mt-5 max-w-md text-[17px] leading-relaxed text-ink/60">{slide.subtitle}</p>
 
-                        <div className="flex flex-wrap gap-2.5 mb-9">
-                            {FEATURES.map(({ icon: Icon, label }) => (
-                                <span
-                                    key={label}
-                                    className="inline-flex items-center gap-1.5 bg-ink/[0.04] border border-ink/10 rounded-full pl-2.5 pr-3.5 py-1.5 text-xs font-semibold text-ink/70"
-                                >
-                                    <Icon size={13} className="text-basil" />
-                                    {label}
-                                </span>
-                            ))}
-                        </div>
+                    <div className="mt-7">
+                        <MacroCard macros={slide.macros} />
+                    </div>
 
-                        <div className="flex flex-wrap items-center gap-5 mb-10">
-                            <Link
-                                href={slide.href}
-                                className="group inline-flex items-center gap-2.5 bg-turmeric text-parchment px-6 py-3.5 rounded-full font-semibold text-sm shadow-md shadow-turmeric/25 transition-all duration-200 hover:bg-clay hover:shadow-lg hover:shadow-clay/25"
+                    <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
+                        <Link
+                            href={slide.href}
+                            className="pressable group inline-flex items-center gap-2.5 rounded-full bg-rust px-7 py-4 text-[15px] font-semibold text-white shadow-[0_14px_30px_-12px_rgba(185,68,31,0.6)] transition hover:bg-clay"
+                        >
+                            {slide.cta}
+                            <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+                        </Link>
+                        <Link
+                            href="/shop"
+                            className="text-[15px] font-semibold text-ink underline decoration-ink/30 underline-offset-[6px] transition hover:decoration-ink"
+                        >
+                            View all products
+                        </Link>
+                    </div>
+
+                    <ul className="mt-8 flex flex-wrap gap-2.5">
+                        {FEATURES.map(({ icon: Icon, label }) => (
+                            <li
+                                key={label}
+                                className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-[13px] font-semibold text-ink/80 ring-1 ring-ink/[0.07]"
                             >
-                                {slide.cta}
-                                <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
-                            </Link>
-                            <Link
-                                href="/shop"
-                                className="text-ink/50 hover:text-ink text-sm font-medium transition underline decoration-ink/20 underline-offset-4"
-                            >
-                                View all products
-                            </Link>
-                        </div>
+                                <Icon size={14} className="text-basil" />
+                                {label}
+                            </li>
+                        ))}
+                    </ul>
 
-                        <div className="hidden md:flex gap-2">
+                    {slides.length > 1 ? (
+                        <div className="mt-6 flex gap-1">
                             {slides.map((_, i) => (
                                 <button
                                     key={i}
@@ -257,25 +278,20 @@ export default function HeroSection() {
                                 >
                                     <span
                                         className={`block h-1.5 rounded-full transition-all duration-300 ${
-                                            i === current ? 'bg-turmeric w-8' : 'bg-ink/15 w-1.5 group-hover:bg-ink/30'
+                                            i === current ? 'w-8 bg-rust' : 'w-1.5 bg-ink/15 group-hover:bg-ink/30'
                                         }`}
                                     />
                                 </button>
                             ))}
                         </div>
-                    </div>
+                    ) : null}
                 </div>
 
-                <div className="relative h-[52vh] md:h-[82vh] order-1 md:order-2">
-                    <div
-                        className="absolute inset-0"
-                        style={{
-                            clipPath: 'polygon(13% 0, 100% 0, 100% 100%, 0% 100%)',
-                        }}
-                    >
-                        {/* Every slide image stays mounted and cross-fades. Remounting one image per slide made each
-                            new slide start as an unloaded lazy image, which showed a grey block every 5 seconds.
-                            The first slide is the LCP image (high priority); the rest load quietly at low priority. */}
+                {/* Photo card */}
+                <div className="relative mx-auto w-full max-w-[540px] lg:mr-0">
+                    <div className="relative aspect-[15/16] overflow-hidden rounded-[34px] bg-[#5a2a17] shadow-[0_40px_80px_-36px_rgba(90,42,23,0.6)]">
+                        {/* Every slide image stays mounted and cross-fades, so a new slide never starts as an
+                            unloaded image. The first slide is the LCP image (high priority); the rest load at low priority. */}
                         {slides.map((s, i) => {
                             const visible = i === current && !isAnimating;
                             return (
@@ -300,23 +316,33 @@ export default function HeroSection() {
                                             src={resolveImage(s.image)}
                                             alt={i === current ? s.title.replace(/\s+/g, ' ') : ''}
                                             fill
-                                            className={`object-cover ${i === current ? 'animate-kenburns' : ''} ${s.imagePosition}`}
+                                            className={`object-cover ${s.imagePosition}`}
                                             priority={i === 0}
                                             fetchPriority={i === 0 ? 'high' : 'low'}
                                             loading={i === 0 ? undefined : 'eager'}
-                                            sizes="(min-width: 768px) 58vw, 100vw"
+                                            sizes="(min-width: 1024px) 540px, 92vw"
                                         />
-                                    ) : (
-                                        <div className="absolute inset-0 bg-ink/10" />
-                                    )}
+                                    ) : null}
                                 </div>
                             );
                         })}
-                        <div className="absolute inset-0 bg-linear-to-t from-ink/45 via-transparent to-transparent md:bg-linear-to-l md:from-transparent md:via-transparent md:to-ink/10" />
                     </div>
 
-                    <div className="absolute top-6 right-6 md:top-10 md:right-10 z-10">
-                        <SattvicSeal />
+                    {totalReviews > 0 ? (
+                        <div className="absolute -left-2 top-6 rounded-2xl bg-white px-4 py-3 shadow-[0_18px_40px_-18px_rgba(36,31,22,0.45)] ring-1 ring-ink/[0.05] sm:-left-10 sm:top-12">
+                            <div className="flex gap-0.5 text-millet" aria-hidden="true">
+                                {[...Array(5)].map((_, i) => (
+                                    <Star key={i} size={13} className={i < Math.round(avgRating) ? 'fill-millet' : 'fill-transparent'} />
+                                ))}
+                            </div>
+                            <p className="mt-1 text-sm text-ink/60">
+                                <span className="font-semibold text-ink">{avgRating.toFixed(1)}</span> {totalReviews}+ verified reviews
+                            </p>
+                        </div>
+                    ) : null}
+
+                    <div className="absolute -bottom-7 -left-2 h-28 w-28 overflow-hidden rounded-full bg-white shadow-[0_20px_40px_-18px_rgba(36,31,22,0.5)] ring-[6px] ring-white sm:-left-10 sm:h-40 sm:w-40">
+                        <Image src={INSET_IMAGE} alt="Vrateez energy bar" fill className="object-cover" sizes="160px" />
                     </div>
                 </div>
             </div>

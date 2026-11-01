@@ -86,17 +86,8 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  icons: {
-    icon: [
-      { url: '/logo.png', sizes: 'any' },
-      { url: '/logo.png', sizes: '32x32', type: 'image/png' },
-      { url: '/logo.png', sizes: '16x16', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/logo.png', sizes: '180x180', type: 'image/png' },
-    ],
-    shortcut: '/logo.png',
-  },
+  // Tab and home-screen icons come from app/favicon.ico, app/icon.png and app/apple-icon.png
+  // (the VZ monogram on the brand's dark square), which Next.js links automatically.
   keywords: [
     // Vrat/Fasting specific
     "vrat food",

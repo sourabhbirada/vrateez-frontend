@@ -56,7 +56,7 @@ function digitsOnlyPhone(value: string): string {
 }
 
 const inputBase =
-  'w-full rounded-xl border bg-white px-4 py-3.5 text-sm text-ink placeholder:text-ink/30 outline-none transition focus:ring-2 focus:ring-turmeric/30 focus:border-turmeric';
+  'w-full rounded-xl border bg-white px-4 py-3.5 text-sm text-ink placeholder:text-ink/30 outline-none transition focus:ring-2 focus:ring-rust/20 focus:border-rust';
 
 function Field({
   label,
@@ -98,9 +98,9 @@ function SectionCard({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-[22px] bg-white ring-1 ring-ink/[0.08] shadow-[0_18px_50px_-36px_rgba(36,31,22,0.5)] overflow-hidden">
-      <header className="flex items-center gap-3 border-b border-ink/[0.06] px-5 md:px-6 py-4">
-        <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink text-parchment font-label text-[11px]">
+    <section className="rounded-[26px] bg-[#FFFCF7] ring-1 ring-[#EBDDCB] shadow-[0_22px_50px_-38px_rgba(120,72,30,0.45)] overflow-hidden">
+      <header className="flex items-center gap-3 border-b border-[#F0E3D2] bg-peach/45 px-5 md:px-6 py-4">
+        <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rust text-white font-label text-[11px]">
           {String(step).padStart(2, '0')}
         </span>
         <div className="min-w-0">
@@ -432,7 +432,7 @@ export default function CheckoutPage() {
     return (
       <main className="min-h-screen bg-parchment flex flex-col items-center justify-center gap-4 text-center px-6">
         <p className="font-display text-2xl text-ink">Your cart is empty</p>
-        <Link href="/shop" className="rounded-full bg-turmeric px-6 py-3 text-sm font-semibold text-parchment hover:bg-clay transition">
+        <Link href="/shop" className="rounded-full bg-rust px-6 py-3 text-sm font-semibold text-parchment hover:bg-clay transition">
           Browse the shop
         </Link>
       </main>
@@ -442,7 +442,7 @@ export default function CheckoutPage() {
   const ctaLabel = paymentMode === 'cod' ? `Place order · ${formatInr(total)}` : `Pay ${formatInr(total)} securely`;
 
   return (
-    <main className="min-h-screen bg-parchment pb-28 lg:pb-16">
+    <main className="min-h-screen bg-cream pb-28 lg:pb-16">
       <div className="max-w-6xl mx-auto px-4 md:px-6 pt-8 md:pt-12">
         {/* Header */}
         <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
@@ -469,7 +469,7 @@ export default function CheckoutPage() {
                       state === 'done'
                         ? 'bg-basil text-parchment'
                         : state === 'active'
-                          ? 'bg-ink text-parchment'
+                          ? 'bg-rust text-white'
                           : 'bg-ink/10 text-ink/40'
                     }`}
                   >
@@ -484,7 +484,7 @@ export default function CheckoutPage() {
         </div>
 
         {/* Mobile order summary toggle */}
-        <div className="lg:hidden mb-5 overflow-hidden rounded-2xl bg-white ring-1 ring-ink/[0.08]">
+        <div className="lg:hidden mb-5 overflow-hidden rounded-2xl bg-[#FFFCF7] ring-1 ring-[#EBDDCB]">
           <button
             type="button"
             onClick={() => setSummaryOpen((v) => !v)}
@@ -502,7 +502,7 @@ export default function CheckoutPage() {
             <ul className="overflow-hidden">
               {items.map((item) => (
                 <li key={`m-${item.id}`} className="flex items-center gap-3 border-t border-ink/[0.06] px-4 py-3">
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-parchment ring-1 ring-ink/[0.06]">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-peach/50 ring-1 ring-[#EBDDCB]">
                     <Image src={resolveImage(item.image)} alt={item.name} fill className="object-cover" sizes="48px" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -526,8 +526,8 @@ export default function CheckoutPage() {
             <SectionCard step={1} title="Contact" subtitle="For order confirmation and delivery updates" icon={UserIcon}>
               {user ? (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 rounded-xl bg-parchment/70 px-4 py-3 ring-1 ring-ink/[0.06]">
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-ink text-parchment text-sm font-semibold">
+                  <div className="flex items-center gap-3 rounded-xl bg-sage/45 px-4 py-3 ring-1 ring-basil/10">
+                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-basil text-cream text-sm font-semibold">
                       {user.name?.charAt(0).toUpperCase()}
                     </span>
                     <div className="min-w-0">
@@ -549,7 +549,7 @@ export default function CheckoutPage() {
                             clearFieldError('phone');
                           }}
                           placeholder="98765 43210"
-                          className={`${inputBase} pl-11 ${fieldErrors.phone ? 'border-clay/60' : 'border-ink/12'}`}
+                          className={`${inputBase} pl-11 ${fieldErrors.phone ? 'border-clay/60' : 'border-[#E6D6C2]'}`}
                         />
                       </div>
                     </Field>
@@ -568,7 +568,7 @@ export default function CheckoutPage() {
                           clearFieldError('name');
                         }}
                         placeholder="Your full name"
-                        className={`${inputBase} ${fieldErrors.name ? 'border-clay/60' : 'border-ink/12'}`}
+                        className={`${inputBase} ${fieldErrors.name ? 'border-clay/60' : 'border-[#E6D6C2]'}`}
                       />
                     </Field>
                   </div>
@@ -583,7 +583,7 @@ export default function CheckoutPage() {
                           clearFieldError('email');
                         }}
                         placeholder="you@email.com"
-                        className={`${inputBase} ${fieldErrors.email ? 'border-clay/60' : 'border-ink/12'}`}
+                        className={`${inputBase} ${fieldErrors.email ? 'border-clay/60' : 'border-[#E6D6C2]'}`}
                       />
                     </Field>
                   </div>
@@ -601,7 +601,7 @@ export default function CheckoutPage() {
                             clearFieldError('phone');
                           }}
                           placeholder="98765 43210"
-                          className={`${inputBase} pl-12 ${fieldErrors.phone ? 'border-clay/60' : 'border-ink/12'}`}
+                          className={`${inputBase} pl-12 ${fieldErrors.phone ? 'border-clay/60' : 'border-[#E6D6C2]'}`}
                         />
                       </div>
                     </Field>
@@ -626,7 +626,7 @@ export default function CheckoutPage() {
                         clearFieldError('line1');
                       }}
                       placeholder="Flat / house no., building, street"
-                      className={`${inputBase} ${fieldErrors.line1 ? 'border-clay/60' : 'border-ink/12'}`}
+                      className={`${inputBase} ${fieldErrors.line1 ? 'border-clay/60' : 'border-[#E6D6C2]'}`}
                     />
                   </Field>
                 </div>
@@ -638,7 +638,7 @@ export default function CheckoutPage() {
                       value={address.line2}
                       onChange={(e) => setAddress({ ...address, line2: e.target.value })}
                       placeholder="Area, landmark"
-                      className={`${inputBase} border-ink/12`}
+                      className={`${inputBase} border-[#E6D6C2]`}
                     />
                   </Field>
                 </div>
@@ -659,7 +659,7 @@ export default function CheckoutPage() {
                         clearFieldError('pincode');
                       }}
                       placeholder="400001"
-                      className={`${inputBase} ${fieldErrors.pincode ? 'border-clay/60' : 'border-ink/12'}`}
+                      className={`${inputBase} ${fieldErrors.pincode ? 'border-clay/60' : 'border-[#E6D6C2]'}`}
                     />
                   </Field>
                 </div>
@@ -675,7 +675,7 @@ export default function CheckoutPage() {
                         clearFieldError('city');
                       }}
                       placeholder="Mumbai"
-                      className={`${inputBase} ${fieldErrors.city ? 'border-clay/60' : 'border-ink/12'}`}
+                      className={`${inputBase} ${fieldErrors.city ? 'border-clay/60' : 'border-[#E6D6C2]'}`}
                     />
                   </Field>
                 </div>
@@ -690,7 +690,7 @@ export default function CheckoutPage() {
                         clearFieldError('state');
                       }}
                       placeholder="Maharashtra"
-                      className={`${inputBase} ${fieldErrors.state ? 'border-clay/60' : 'border-ink/12'}`}
+                      className={`${inputBase} ${fieldErrors.state ? 'border-clay/60' : 'border-[#E6D6C2]'}`}
                     />
                   </Field>
                 </div>
@@ -711,7 +711,7 @@ export default function CheckoutPage() {
                   rows={2}
                   maxLength={300}
                   placeholder="Gate code, preferred time, gift message…"
-                  className={`${inputBase} border-ink/12 mt-3 resize-none`}
+                  className={`${inputBase} border-[#E6D6C2] mt-3 resize-none`}
                 />
               ) : null}
             </SectionCard>
@@ -747,12 +747,12 @@ export default function CheckoutPage() {
                       disabled={!opt.enabled}
                       onClick={() => setPaymentMode(opt.id)}
                       className={`relative flex items-start gap-3 rounded-2xl p-4 text-left ring-1 transition disabled:opacity-50 ${
-                        selected ? 'bg-turmeric/[0.07] ring-turmeric shadow-[0_0_0_3px_rgba(196,113,31,0.12)]' : 'bg-parchment/50 ring-ink/10 hover:ring-ink/25'
+                        selected ? 'bg-peach/60 ring-rust shadow-[0_0_0_3px_rgba(185,68,31,0.12)]' : 'bg-white ring-[#E6D6C2] hover:ring-rust/40'
                       }`}
                     >
                       <span
                         className={`mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-                          selected ? 'bg-turmeric text-parchment' : 'bg-white text-ink/50 ring-1 ring-ink/10'
+                          selected ? 'bg-rust text-white' : 'bg-cream text-ink/50 ring-1 ring-[#E6D6C2]'
                         }`}
                       >
                         <Icon size={16} />
@@ -762,12 +762,12 @@ export default function CheckoutPage() {
                         <span className="block text-xs text-ink/50 mt-0.5">{opt.sub}</span>
                       </span>
                       {opt.badge ? (
-                        <span className="absolute top-3 right-3 rounded-full bg-ink text-parchment px-2 py-0.5 font-label text-[9px] tracking-[0.12em] uppercase">
+                        <span className="absolute top-3 right-3 rounded-full bg-basil text-cream px-2 py-0.5 font-label text-[9px] tracking-[0.12em] uppercase">
                           {opt.badge}
                         </span>
                       ) : null}
                       {selected ? (
-                        <span className="absolute bottom-3 right-3 inline-flex h-5 w-5 items-center justify-center rounded-full bg-turmeric text-parchment">
+                        <span className="absolute bottom-3 right-3 inline-flex h-5 w-5 items-center justify-center rounded-full bg-rust text-white">
                           <Check size={12} strokeWidth={3} />
                         </span>
                       ) : null}
@@ -786,15 +786,15 @@ export default function CheckoutPage() {
 
           {/* Right column: summary */}
           <aside className="lg:sticky lg:top-24">
-            <div className="rounded-[22px] bg-white ring-1 ring-ink/[0.08] shadow-[0_30px_70px_-40px_rgba(36,31,22,0.55)] overflow-hidden">
-              <div className="flex items-center justify-between bg-ink px-5 py-4 text-parchment">
+            <div className="rounded-[26px] bg-[#FFFCF7] ring-1 ring-[#EBDDCB] shadow-[0_30px_70px_-44px_rgba(120,72,30,0.5)] overflow-hidden">
+              <div className="flex items-center justify-between border-b border-[#F0E3D2] bg-peach px-5 py-4 text-ink">
                 <div>
                   <h2 className="font-display text-lg leading-tight">Order summary</h2>
-                  <p className="text-xs text-parchment/55 mt-0.5">
+                  <p className="text-xs text-ink/55 mt-0.5">
                     {itemCount} item{itemCount === 1 ? '' : 's'}
                   </p>
                 </div>
-                <button type="button" onClick={openCart} className="text-xs font-semibold text-millet hover:text-parchment transition">
+                <button type="button" onClick={openCart} className="text-xs font-semibold text-rust hover:text-clay transition">
                   Edit cart
                 </button>
               </div>
@@ -803,9 +803,9 @@ export default function CheckoutPage() {
                 <ul className="max-h-64 space-y-3 overflow-y-auto pr-1">
                   {items.map((item) => (
                     <li key={item.id} className="flex items-center gap-3">
-                      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-parchment ring-1 ring-ink/[0.06]">
+                      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-peach/50 ring-1 ring-[#EBDDCB]">
                         <Image src={resolveImage(item.image)} alt={item.name} fill className="object-cover" sizes="56px" />
-                        <span className="absolute -top-1 -right-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-ink px-1 text-[10px] font-semibold text-parchment">
+                        <span className="absolute -top-1 -right-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-rust px-1 text-[10px] font-semibold text-white">
                           {item.quantity}
                         </span>
                       </div>
@@ -823,7 +823,7 @@ export default function CheckoutPage() {
 
                 {/* free shipping progress */}
                 {!hasFreeDeliveryProduct ? (
-                  <div className="mt-5 rounded-xl bg-parchment/70 px-3.5 py-3 ring-1 ring-ink/[0.06]">
+                  <div className="mt-5 rounded-xl bg-sage/45 px-3.5 py-3 ring-1 ring-basil/10">
                     <div className="flex items-center justify-between text-xs">
                       <span className="inline-flex items-center gap-1.5 text-ink/70">
                         <Truck size={13} className="text-clay" />
@@ -865,14 +865,14 @@ export default function CheckoutPage() {
                             }
                           }}
                           placeholder="Coupon code"
-                          className={`${inputBase} border-ink/12 pl-10 py-2.5`}
+                          className={`${inputBase} border-[#E6D6C2] pl-10 py-2.5`}
                         />
                       </div>
                       <button
                         type="button"
                         onClick={handleApplyCoupon}
                         disabled={isApplyingCoupon || !couponInput.trim()}
-                        className="rounded-xl bg-ink px-4 text-sm font-semibold text-parchment transition hover:bg-basil disabled:opacity-40"
+                        className="rounded-xl bg-rust px-5 text-sm font-semibold text-white transition hover:bg-clay disabled:opacity-40"
                       >
                         {isApplyingCoupon ? <Loader2 size={14} className="animate-spin" /> : 'Apply'}
                       </button>
@@ -918,7 +918,7 @@ export default function CheckoutPage() {
                   type="button"
                   onClick={handlePlaceOrder}
                   disabled={isLoading}
-                  className="group mt-5 hidden w-full items-center justify-center gap-2 rounded-full bg-turmeric py-4 text-sm font-semibold text-parchment shadow-lg shadow-turmeric/25 transition hover:bg-clay disabled:cursor-not-allowed disabled:opacity-60 lg:flex"
+                  className="group mt-5 hidden w-full items-center justify-center gap-2 rounded-full bg-rust py-4 text-sm font-semibold text-parchment shadow-lg shadow-rust/25 transition hover:bg-clay disabled:cursor-not-allowed disabled:opacity-60 lg:flex"
                 >
                   {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Lock size={16} />}
                   {isLoading ? 'Processing…' : ctaLabel}
@@ -931,7 +931,7 @@ export default function CheckoutPage() {
                     { icon: Lock, label: 'Secure payment' },
                     { icon: Truck, label: 'Pan-India delivery' },
                   ].map(({ icon: Icon, label }) => (
-                    <li key={label} className="rounded-xl bg-parchment/60 px-2 py-2.5">
+                    <li key={label} className="rounded-xl bg-butter px-2 py-2.5">
                       <Icon size={14} className="mx-auto text-clay" />
                       <p className="mt-1 text-[10px] font-medium text-ink/60 leading-tight">{label}</p>
                     </li>
@@ -944,7 +944,7 @@ export default function CheckoutPage() {
       </div>
 
       {/* Mobile sticky CTA */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-ink/10 bg-parchment/95 px-4 py-3 backdrop-blur lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-ink/10 bg-cream/95 px-4 py-3 backdrop-blur lg:hidden">
         <div className="mx-auto flex max-w-6xl items-center gap-3">
           <div className="min-w-0">
             <p className="text-[10px] font-label uppercase tracking-[0.14em] text-ink/45">Total</p>
@@ -954,7 +954,7 @@ export default function CheckoutPage() {
             type="button"
             onClick={handlePlaceOrder}
             disabled={isLoading}
-            className="ml-auto inline-flex items-center justify-center gap-2 rounded-full bg-turmeric px-6 py-3.5 text-sm font-semibold text-parchment shadow-lg shadow-turmeric/25 transition hover:bg-clay disabled:opacity-60"
+            className="ml-auto inline-flex items-center justify-center gap-2 rounded-full bg-rust px-6 py-3.5 text-sm font-semibold text-parchment shadow-lg shadow-rust/25 transition hover:bg-clay disabled:opacity-60"
           >
             {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Lock size={14} />}
             {isLoading ? 'Processing…' : paymentMode === 'cod' ? 'Place order' : 'Pay now'}

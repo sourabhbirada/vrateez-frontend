@@ -6,7 +6,11 @@
  * /public/virteez. Unknown or empty URLs fall back to a placeholder.
  */
 
-export const PLACEHOLDER_IMAGE = "/logo.png";
+/** Shown when a product has no photo: the logo on the brand's dark background, readable at any size. */
+export const PLACEHOLDER_IMAGE = "/placeholder-product.jpg";
+
+/** Products created in the CMS without a photo often point at the bare logo, which is unreadable on light cards. */
+const LOGO_PATHS = new Set(["/logo.png", "logo.png"]);
 
 const S3_HOSTS = ["vrateez.s3.ap-south-1.amazonaws.com", "vrateez.s3.amazonaws.com", "s3.ap-south-1.amazonaws.com/vrateez"];
 
@@ -80,6 +84,7 @@ export function isS3Url(url?: string | null): boolean {
  */
 export function resolveImage(url?: string | null, fallback: string = PLACEHOLDER_IMAGE): string {
   if (!url || typeof url !== "string" || !url.trim()) return fallback;
+  if (LOGO_PATHS.has(url.trim().toLowerCase())) return fallback || PLACEHOLDER_IMAGE;
   const key = decodeS3Key(url);
   if (key === null) return url;
   const base = key.split("/").pop() || key;

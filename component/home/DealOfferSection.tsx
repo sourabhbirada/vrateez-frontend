@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Check, Gift, Package, ShieldCheck, Sparkles, Truck } from 'lucide-react';
+import { ArrowRight, Check, Gift, Package, ShieldCheck, Truck, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -22,14 +22,7 @@ const FALLBACK_DEAL: Deal = {
     video: '',
     price: 379,
     originalPrice: 499,
-    items: [
-        'Energy Bar',
-        'Coconut Cookies',
-        'Dry Fruit Cookies',
-        'Millet Bites',
-        'Decorative Diyas',
-        'Festive Greeting Card',
-    ],
+    items: ['Energy Bar', 'Coconut Cookies', 'Dry Fruit Cookies', 'Millet Bites', 'Decorative Diyas', 'Festive Greeting Card'],
     productSlug: 'diwali-gift-hamper',
     placement: 'homepage',
     bgFrom: '#FFF5E6',
@@ -42,26 +35,19 @@ const TRUST = [
     { icon: Package, label: 'Premium gift box' },
     { icon: Truck, label: 'Pan-India delivery' },
     { icon: ShieldCheck, label: 'Clean label · FSSAI' },
+    { icon: Users, label: 'Bulk orders welcome', href: '/bulk-order' },
 ];
 
-const MARQUEE = ['Diwali Special', 'Save ₹120', 'Free delivery above ₹499', 'Limited stock', 'Vrat friendly', 'Zero added sugar'];
-
-function MarqueeStrip() {
-    const items = [...MARQUEE, ...MARQUEE];
-    return (
-        <div className="relative overflow-hidden bg-millet text-ink border-y border-ink/10">
-            <div className="flex w-max animate-marquee whitespace-nowrap py-2.5">
-                {items.map((t, i) => (
-                    <span key={`${t}-${i}`} className="inline-flex items-center gap-4 px-5 font-label text-[11px] tracking-[0.22em] uppercase">
-                        <Sparkles size={11} className="shrink-0" />
-                        {t}
-                    </span>
-                ))}
-            </div>
-        </div>
-    );
+/** "Energy bar, coconut cookies and a festive greeting card." from the deal's item list. */
+function itemsSentence(items: string[]) {
+    if (!items.length) return '';
+    const parts = items.map((it, i) => (i === 0 ? it.charAt(0) + it.slice(1).toLowerCase() : it.toLowerCase()));
+    const last = parts.pop()!;
+    const lastWithArticle = /card|box/i.test(last) ? `a ${last}` : last;
+    return parts.length ? `${parts.join(', ')} and ${lastWithArticle}.` : `${lastWithArticle}.`;
 }
 
+/** Festive hamper offer (design B3): photo left, price and add-to-cart right, trust strip below. */
 function DealCard({ deal }: { deal: Deal }) {
     const { addToCart, toggleCart } = useCart();
     const { products } = useProducts();
@@ -70,11 +56,13 @@ function DealCard({ deal }: { deal: Deal }) {
     const [adding, setAdding] = useState(false);
 
     const detailsHref = deal.ctaLink && deal.ctaLink.startsWith('/') && !deal.ctaLink.startsWith('/product/') ? deal.ctaLink : '/diwali';
-    const productHref = deal.productSlug?.trim() ? `/product/${deal.productSlug.trim()}` : detailsHref;
+    const productHref = slug ? `/product/${slug}` : detailsHref;
     const price = product?.price ?? deal.price;
     const originalPrice = product?.originalPrice ?? deal.originalPrice;
     const savings = originalPrice > price && price > 0 ? originalPrice - price : 0;
     const pct = savings ? Math.round((savings / originalPrice) * 100) : 0;
+    const image = resolveImage(deal.image || undefined);
+    const description = deal.items?.length ? itemsSentence(deal.items) : deal.subtitle;
 
     const handleAdd = () => {
         if (!product) return;
@@ -94,180 +82,86 @@ function DealCard({ deal }: { deal: Deal }) {
     };
 
     return (
-        <section className="relative overflow-hidden bg-ink text-parchment">
-            <MarqueeStrip />
-
-            <div
-                className="pointer-events-none absolute inset-0 opacity-[0.10]"
-                aria-hidden="true"
-                style={{
-                    backgroundImage:
-                        'radial-gradient(ellipse at 18% 25%, #E4A93D 0%, transparent 42%), radial-gradient(ellipse at 88% 75%, #C4711F 0%, transparent 38%)',
-                }}
-            />
-            <div className="pointer-events-none absolute inset-0 grain-overlay opacity-[0.05] mix-blend-overlay" aria-hidden="true" />
-
-            <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24">
-                <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-16 items-center">
-                    {/* Media */}
-                    <div className="relative" data-reveal>
-                        <div className="absolute -inset-3 md:-inset-4 rounded-[28px] border border-millet/20" aria-hidden="true" />
-                        <div className="absolute -inset-6 md:-inset-8 rounded-[36px] border border-millet/10" aria-hidden="true" />
-
-                        <div className="relative aspect-[4/3] overflow-hidden rounded-[22px] ring-1 ring-parchment/15 shadow-[0_40px_90px_-30px_rgba(0,0,0,0.8)]">
-                            {deal.video ? (
-                                <video
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                    poster={resolveImage(deal.image || undefined)}
-                                    className="absolute inset-0 h-full w-full object-cover"
-                                >
-                                    <source src={deal.video} type="video/mp4" />
-                                </video>
-                            ) : deal.image ? (
-                                resolveImage(deal.image).startsWith('/') ? (
-                                    // Optimised and lazy: the raw PNG was ~1 MB and React preloaded it, competing with the hero image.
-                                    <Image
-                                        src={resolveImage(deal.image)}
-                                        alt={deal.title}
-                                        fill
-                                        sizes="(min-width: 1024px) 50vw, 100vw"
-                                        className="object-cover"
-                                    />
-                                ) : (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img
-                                        src={resolveImage(deal.image)}
-                                        alt={deal.title}
-                                        loading="lazy"
-                                        decoding="async"
-                                        className="absolute inset-0 h-full w-full object-cover"
-                                    />
-                                )
-                            ) : (
-                                <div className="absolute inset-0 bg-basil" />
-                            )}
-                            <div className="absolute inset-0 bg-linear-to-t from-ink/60 via-transparent to-transparent" />
-
-                            {deal.badge ? (
-                                <span className="absolute top-4 left-4 inline-flex items-center gap-2 bg-ink/70 backdrop-blur-md text-millet font-label text-[10px] tracking-[0.22em] uppercase px-3 py-1.5 rounded-full ring-1 ring-millet/30">
-                                    <span className="relative flex h-1.5 w-1.5">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-millet opacity-70" />
-                                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-millet" />
-                                    </span>
-                                    {deal.badge}
-                                </span>
-                            ) : null}
-
-                            {deal.items?.length ? (
-                                <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-1.5">
-                                    {deal.items.slice(0, 4).map((item) => (
-                                        <span key={item} className="bg-parchment/15 backdrop-blur-md text-parchment text-[11px] font-medium px-2.5 py-1 rounded-full ring-1 ring-parchment/20">
-                                            {item}
-                                        </span>
-                                    ))}
-                                    {deal.items.length > 4 ? (
-                                        <span className="bg-parchment/15 backdrop-blur-md text-parchment/80 text-[11px] px-2.5 py-1 rounded-full ring-1 ring-parchment/20">
-                                            +{deal.items.length - 4} more
-                                        </span>
-                                    ) : null}
-                                </div>
-                            ) : null}
-                        </div>
-
-                        {price > 0 ? (
-                            <div className="absolute -bottom-6 -right-2 md:-right-6 bg-parchment text-ink rounded-2xl px-5 py-4 shadow-2xl ring-1 ring-ink/10 animate-glow">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="font-display text-3xl md:text-4xl leading-none">₹{price}</span>
-                                    {originalPrice > price ? <span className="text-sm text-ink/40 line-through">₹{originalPrice}</span> : null}
-                                </div>
-                                {savings > 0 ? (
-                                    <p className="mt-1 font-label text-[10px] tracking-[0.18em] uppercase text-clay">
-                                        Save ₹{savings} · {pct}% off
-                                    </p>
-                                ) : null}
-                            </div>
+        <section className="bg-butter">
+            <div className="mx-auto max-w-7xl px-5 py-14 md:px-8 md:py-20">
+                <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-14">
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-[30px] bg-[#5a2a17] shadow-[0_34px_70px_-34px_rgba(90,42,23,0.65)]" data-reveal>
+                        {deal.video ? (
+                            <video autoPlay loop muted playsInline poster={image} className="absolute inset-0 h-full w-full object-cover">
+                                <source src={deal.video} type="video/mp4" />
+                            </video>
+                        ) : deal.image && image.startsWith('/') ? (
+                            <Image src={image} alt={deal.title} fill sizes="(min-width: 1024px) 55vw, 92vw" className="object-cover" />
+                        ) : deal.image ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={image} alt={deal.title} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
                         ) : null}
                     </div>
 
-                    {/* Copy */}
-                    <div className="space-y-8 lg:pl-4" data-reveal data-reveal-delay="150">
-                        <div>
-                            <p className="font-label text-[10px] tracking-[0.24em] uppercase text-millet/80 mb-4 flex items-center gap-2">
-                                <Gift size={13} />
-                                Festive gifting
-                            </p>
-                            <h2 className="font-display italic text-4xl md:text-[3.4rem] leading-[1.02] tracking-[-0.015em] whitespace-pre-line">
-                                {deal.title}
-                            </h2>
-                            {deal.subtitle ? <p className="mt-4 text-base md:text-lg text-parchment/70 leading-relaxed max-w-md">{deal.subtitle}</p> : null}
-                        </div>
+                    <div className="min-w-0" data-reveal data-reveal-delay="120">
+                        <p className="inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-rust">
+                            <Gift size={14} />
+                            Festive gifting
+                        </p>
+                        <h2 className="mt-4 text-balance font-display text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-ink md:text-[3.4rem]">
+                            {deal.title}
+                        </h2>
+                        {description ? <p className="mt-5 max-w-lg text-[16px] leading-relaxed text-ink/75">{description}</p> : null}
 
-                        {deal.description ? <p className="text-[15px] text-parchment/55 leading-relaxed max-w-lg">{deal.description}</p> : null}
-
-                        {deal.items?.length ? (
-                            <div>
-                                <p className="font-label text-[10px] tracking-[0.18em] uppercase text-millet/80 mb-4">What&apos;s inside</p>
-                                <ul className="grid grid-cols-2 gap-x-6 gap-y-3">
-                                    {deal.items.map((item, i) => (
-                                        <li key={item} className="flex items-center gap-3 text-sm text-parchment/85">
-                                            <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-millet/15 text-millet font-label text-[10px] ring-1 ring-millet/30">
-                                                {String(i + 1).padStart(2, '0')}
-                                            </span>
-                                            {item}
-                                        </li>
-                                    ))}
-                                </ul>
+                        {price > 0 ? (
+                            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
+                                <span className="font-display text-5xl font-semibold leading-none text-rust md:text-6xl">₹{price}</span>
+                                {originalPrice > price ? <span className="text-lg text-ink/45 line-through">₹{originalPrice}</span> : null}
+                                {pct > 0 ? (
+                                    <span className="rounded-full bg-basil px-3 py-1.5 text-sm font-semibold text-cream">{pct}% OFF</span>
+                                ) : null}
                             </div>
                         ) : null}
 
-                        <div className="flex flex-wrap gap-x-6 gap-y-2 border-t border-parchment/10 pt-6">
-                            {TRUST.map(({ icon: Icon, label }) => (
-                                <span key={label} className="inline-flex items-center gap-2 text-xs text-parchment/60">
-                                    <Icon size={14} className="text-millet" strokeWidth={1.75} />
-                                    {label}
-                                </span>
-                            ))}
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-4">
+                        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                             {product ? (
                                 <button
                                     type="button"
                                     onClick={handleAdd}
-                                    className="group inline-flex items-center gap-2.5 bg-turmeric text-parchment px-7 py-3.5 rounded-full font-semibold text-sm shadow-lg shadow-turmeric/25 transition-all duration-200 hover:bg-clay hover:shadow-clay/30"
+                                    className="pressable group inline-flex items-center gap-2.5 rounded-full bg-rust px-7 py-4 text-[15px] font-semibold text-white shadow-[0_14px_30px_-12px_rgba(185,68,31,0.6)] transition hover:bg-clay"
                                 >
-                                    {adding ? <Check size={15} strokeWidth={2.5} /> : null}
+                                    {adding ? <Check size={16} strokeWidth={2.5} /> : null}
                                     {adding ? 'Added to cart' : 'Add hamper to cart'}
-                                    {!adding ? <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" /> : null}
+                                    {!adding ? <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" /> : null}
                                 </button>
                             ) : (
                                 <Link
                                     href={productHref}
-                                    className="group inline-flex items-center gap-2.5 bg-turmeric text-parchment px-7 py-3.5 rounded-full font-semibold text-sm shadow-lg shadow-turmeric/25 transition-all duration-200 hover:bg-clay"
+                                    className="pressable group inline-flex items-center gap-2.5 rounded-full bg-rust px-7 py-4 text-[15px] font-semibold text-white transition hover:bg-clay"
                                 >
-                                    {deal.cta || 'Order Now'}
-                                    <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+                                    {deal.cta || 'Order now'}
+                                    <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
                                 </Link>
                             )}
                             <Link
                                 href={detailsHref}
-                                className="inline-flex items-center gap-1.5 text-parchment/60 hover:text-parchment text-sm font-medium transition underline decoration-parchment/20 underline-offset-4"
+                                className="text-[15px] font-semibold text-ink underline decoration-ink/30 underline-offset-[6px] transition hover:decoration-ink"
                             >
                                 Full details
                             </Link>
                         </div>
-
-                        <p className="text-xs text-parchment/40">
-                            Gifting for a team or family?{' '}
-                            <Link href="/bulk-order" className="text-millet/90 hover:text-millet underline underline-offset-4">
-                                Order hampers in bulk
-                            </Link>
-                        </p>
                     </div>
                 </div>
+
+                <ul className="mt-10 grid grid-cols-2 gap-4 rounded-[22px] bg-white px-6 py-5 ring-1 ring-ink/[0.05] md:grid-cols-4 md:px-8">
+                    {TRUST.map(({ icon: Icon, label, href }) => (
+                        <li key={label} className="flex items-center gap-2.5 text-[15px] font-semibold text-ink md:justify-center">
+                            <Icon size={17} className="shrink-0 text-rust" strokeWidth={1.9} />
+                            {href ? (
+                                <Link href={href} className="underline-offset-4 hover:underline">
+                                    {label}
+                                </Link>
+                            ) : (
+                                label
+                            )}
+                        </li>
+                    ))}
+                </ul>
             </div>
         </section>
     );
