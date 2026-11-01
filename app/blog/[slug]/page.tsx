@@ -138,20 +138,13 @@ export default async function BlogPostPage({ params }: { params: Promise<Params>
               </nav>
             ) : null}
 
-            <div className="rounded-[22px] bg-ink text-parchment p-6">
-              <p className="font-label text-[10px] tracking-[0.2em] uppercase text-millet/80 mb-2">Diwali special</p>
-              <p className="font-display italic text-2xl leading-tight">Gift health, not sugar.</p>
-              <p className="mt-2 text-sm text-parchment/65">Energy bars, millet cookies, diyas and a card in a festive box for ₹379.</p>
-              <Link href="/diwali" className="mt-4 inline-flex items-center gap-2 rounded-full bg-turmeric px-5 py-2.5 text-sm font-semibold text-parchment hover:bg-clay transition pressable">
-                <Gift size={15} /> See the hamper <ArrowRight size={14} />
-              </Link>
-            </div>
-
             <div className="rounded-[22px] bg-white ring-1 ring-ink/[0.08] p-6">
-              <p className="font-label text-[10px] tracking-[0.2em] uppercase text-clay mb-2">Ordering for a team?</p>
-              <p className="text-sm text-ink/65 leading-relaxed">Branded cards, home delivery per employee and volume pricing from 20 boxes.</p>
-              <Link href="/bulk-order" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-clay hover:text-ink transition">
-                Get bulk pricing <ArrowRight size={14} />
+              <p className="font-label text-[10px] tracking-[0.2em] uppercase text-clay mb-2">About this blog</p>
+              <p className="text-sm text-ink/65 leading-relaxed">
+                Written by the team at Vrateez, a small millet kitchen in Jaipur. We publish what we learn about fasting food, snack labels and gifting, and keep the shop out of the articles.
+              </p>
+              <Link href="/diwali" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-clay hover:text-ink transition">
+                <Gift size={14} /> Our Diwali box, if you need one <ArrowRight size={14} />
               </Link>
             </div>
 
@@ -188,22 +181,26 @@ export default async function BlogPostPage({ params }: { params: Promise<Params>
           </section>
         ) : null}
 
-        <section className="mt-14 relative overflow-hidden rounded-[26px] bg-ink text-parchment px-6 md:px-10 py-10 md:py-12">
-          <div className="pointer-events-none absolute inset-0 opacity-[0.14]" aria-hidden="true" style={{ backgroundImage: 'radial-gradient(ellipse at 20% 30%, #E4A93D 0%, transparent 40%)' }} />
-          <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-              <p className="font-label text-[10px] tracking-[0.24em] uppercase text-millet/80 mb-2">Ready to order</p>
-              <h2 className="font-display italic text-3xl md:text-4xl leading-tight">Hampers that people actually finish.</h2>
-              <p className="mt-2 text-parchment/65 text-sm max-w-md">Zero added sugar, vrat friendly, FSSAI certified. Free delivery above ₹499, cash on delivery available.</p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <Link href="/diwali" className="inline-flex items-center gap-2 rounded-full bg-turmeric px-6 py-3.5 text-sm font-semibold text-parchment hover:bg-clay transition pressable">
-                Diwali hamper <ArrowRight size={15} />
-              </Link>
-              <Link href="/bulk-order" className="inline-flex items-center gap-2 rounded-full bg-parchment/10 ring-1 ring-parchment/20 px-6 py-3.5 text-sm font-semibold text-parchment hover:bg-parchment/20 transition">
-                Bulk order
-              </Link>
-            </div>
+        <section className="mt-14 max-w-3xl rounded-[22px] bg-white ring-1 ring-ink/[0.08] px-6 md:px-8 py-7">
+          <p className="font-label text-[10px] tracking-[0.2em] uppercase text-clay mb-2">Was this useful?</p>
+          <p className="text-[15px] text-ink/70 leading-relaxed">
+            Send it to the person who has to decide. New guides on fasting food, snack labels and gifting go out a couple of times a month on WhatsApp, with no sales messages in between.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2.5">
+            <a href={`https://wa.me/?text=${shareText}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366]/15 px-4 py-2.5 text-sm font-semibold text-[#128C7E] hover:bg-[#25D366]/25">
+              <MessageCircle size={14} /> Share on WhatsApp
+            </a>
+            <a
+              href={`https://wa.me/916375010189?text=${encodeURIComponent('Hi, please add me to the Vrateez guides list.')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full ring-1 ring-ink/15 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-ink/5"
+            >
+              Get the next guide
+            </a>
+            <Link href="/blog" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium text-ink/60 hover:text-ink">
+              All guides <ArrowRight size={14} />
+            </Link>
           </div>
         </section>
 
