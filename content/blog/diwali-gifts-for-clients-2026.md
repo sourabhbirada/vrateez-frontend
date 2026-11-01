@@ -8,12 +8,12 @@ coverAlt: Diwali gift hampers with millet cookies, energy bars and diyas on a fe
 category: Gifting
 author: Vrateez Team
 keywords: ["diwali gifts for clients", "diwali corporate gifting", "corporate gifting", "luxury diwali gift hampers", "unique diwali gifts", "diwali gifting hampers", "diwali 2026 date", "healthy diwali gift hamper"]
-faq: [{"q":"When is Diwali in 2026?","a":"Diwali, the day of Lakshmi Puja, is Sunday, 8 November 2026. Dhanteras is Friday 6 November, Choti Diwali is Saturday 7 November, Govardhan Puja is Monday 9 November and Bhai Dooj is Tuesday 10 November on most calendars. Puja timings vary by city, so check a local panchang."},{"q":"How much should a company spend on Diwali gifts?","a":"Most companies we work with spend ₹500 to ₹1,500 per client and ₹300 to ₹700 per employee. Spend on fewer, better items rather than a bigger box, and keep the same tier across similar accounts so no one compares notes."},{"q":"What is the last date to order corporate Diwali gifts in 2026?","a":"For delivery before 8 November, place bulk orders by 2 or 3 November for metro cities and a day or two earlier for smaller towns. Next year, lock the supplier and quantities by mid September and you will pay less for the same box."},{"q":"Do people actually like healthy Diwali hampers?","a":"Yes, provided the box still feels festive. Pair zero-added-sugar snacks with diyas, a card and good packaging. The difference shows a week later: the healthy box is empty and the sweet box is still on the counter."},{"q":"Can Diwali gifts be delivered to employees' homes?","a":"Yes. We ship individual boxes anywhere in India with a branded card, which suits hybrid teams. Send a spreadsheet of names, phone numbers and addresses with the order and every box goes out on the same day."}]
+faq: [{"q":"When is Diwali in 2026?","a":"Diwali, the day of Lakshmi Puja, is Sunday, 8 November 2026. Dhanteras is Friday 6 November, Choti Diwali is Saturday 7 November, Govardhan Puja is Monday 9 November and Bhai Dooj is Tuesday 10 November on most calendars. Puja timings vary by city, so check a local panchang."},{"q":"How much should a company spend on Diwali gifts?","a":"A common range is ₹500 to ₹1,500 per client and ₹300 to ₹700 per employee. Spend on fewer, better items rather than a bigger box, and keep the same tier across similar accounts so no one compares notes."},{"q":"What is the last date to order corporate Diwali gifts in 2026?","a":"For delivery before 8 November, place bulk orders by 2 or 3 November for metro cities and a day or two earlier for smaller towns. Next year, lock the supplier and quantities by mid September and you will pay less for the same box."},{"q":"Do people actually like healthy Diwali hampers?","a":"Yes, provided the box still feels festive. Pair low-sugar snacks with diyas, a card and good packaging. The difference shows a week later: the healthy box is empty and the sweet box is still on the counter."},{"q":"Can Diwali gifts be delivered to employees' homes?","a":"Most hamper suppliers now ship individual boxes anywhere in India. Send a spreadsheet of names, phone numbers, addresses and pincodes with the order, ask for one dispatch date, and share the tracking numbers with the team."}]
 ---
 
 Diwali is on **Sunday, 8 November** this year. In practice that means offices hand out gifts on Thursday the 5th or Friday the 6th, the day of Dhanteras, and anything that has not shipped by the start of that week will arrive after the lights are already up.
 
-If you are responsible for the gift list this year, whether it is thirty clients, a team of two hundred or the extended family, this guide covers the three decisions that matter: what to give, what to spend, and when to order.
+If the gift list is your job this year, whether it is thirty clients, a team of two hundred or the extended family, there are only three decisions that matter: what to give, what to spend, and when to order. This guide takes them in that order.
 
 ## Diwali 2026: the dates you are working against
 
@@ -46,23 +46,23 @@ The fixes follow directly: give food people will finish, give fewer and better t
 ### Under ₹500: large teams, vendors, building staff
 
 1. **A box of roasted makhana.** Fox nuts roasted in ghee with rock salt or peri-peri. Light, crunchy, suitable for someone fasting and for a toddler, and the first thing to disappear at a card party.
-2. **A tin of millet cookies.** Ragi or jowar cookies sweetened with dates rather than sugar. They taste like a biscuit and sit in the stomach like breakfast.
+2. **A tin of millet cookies.** Ragi or jowar cookies sweetened with dates rather than sugar. They taste like a biscuit and sit in the stomach like breakfast. Check that the first ingredient is a millet, not refined flour.
 3. **Two diyas and a pouch of almonds.** Hand-painted terracotta diyas with 100 grams of almonds. Small, traditional, and nothing in it gets thrown away.
-4. **Instant sama upma.** A kind gift for anyone keeping the Kartik fast and a useful pantry item for everyone else.
+4. **Instant sama upma or a vrat thali kit.** A kind gift for anyone keeping the Kartik fast and a useful pantry item for everyone else.
 
 ### ₹500 to ₹1,500: clients, managers, people you want to remember you
 
-5. **A properly curated hamper.** Four to six items, not sixteen: one savoury, one sweet, one for the bag, one ritual item, one card. Our own [Diwali hamper](https://www.vrateez.in/diwali) is built this way, with energy bars, millet cookies and bites, decorative diyas and a greeting card for ₹379, which leaves room in a ₹1,000 budget for a second box for the client's family.
+5. **A properly curated hamper.** Four to six items, not sixteen: one savoury, one sweet, one for the bag, one ritual item, one card. Whether you assemble it yourself or buy it ready-made, hold every item to the same test: would the person buy this for themselves? A ₹400 to ₹600 box of good food leaves room in a ₹1,000 budget for a second box for the client's family, which is remembered far longer than a bigger single box.
 6. **Cold-pressed oil and one good spice.** Groundnut or coconut oil with a jar of Kashmiri chilli or a small tin of saffron. It improves every meal for a month and says you noticed they cook.
-7. **A box of nut and seed bars.** For the client who runs, cycles or travels. Check that the bars are bound with dates, not glucose syrup.
+7. **A box of nut and seed bars.** For the client who runs, cycles or travels. Read the label: bars bound with dates keep; bars bound with glucose syrup are candy.
 8. **A plant in a terracotta diya pot.** Tulsi or a jade plant in a hand-painted pot. Costs less than a box of mithai and is still on the windowsill next Diwali.
 
 ### ₹1,500 and above: when the gift has to carry weight
 
 Luxury this year means fewer objects, better materials and a story on the card, not a bigger box of sweets.
 
-9. **Handmade tableware with something to put in it.** A pair of ceramic bowls or a brass diya, with a tin of millet cookies to fill them. The tableware stays on the shelf and carries your name for years.
-10. **Block-printed table linen with a festive food box.** A runner for the Diwali table, with makhana and bars to put on it.
+9. **Handmade tableware with something to put in it.** A pair of ceramic bowls or a brass diya, with a tin of cookies or makhana to fill them. The tableware stays on the shelf and carries your name for years.
+10. **Block-printed table linen with a festive food box.** A runner for the Diwali table, with snacks to put on it.
 11. **An experience, plus a token to open on the day.** A pottery session, a cooking class or a wellness day, delivered with a small hamper so there is still something to unwrap.
 12. **A donation in the client's name, with an honest card and a modest box.** Done well, this is the gift people mention months later. Name the school or kitchen, say what the money did, keep the box small.
 
@@ -95,7 +95,7 @@ For this year, with Diwali on the 8th, the realistic last day to order for metro
 
 - **Fewer, better.** Five good items beat twenty average ones.
 - **One ritual item.** A diya or a small brass piece turns a snack delivery into a Diwali gift.
-- **Food people finish.** Roasted over fried, dates over sugar, nuts over biscuits. The zero-added-sugar box is the one that gets eaten in the week after Diwali, when everyone else's sweets are still on the counter.
+- **Food people finish.** Roasted over fried, dates over sugar, nuts over biscuits. The low-sugar box is the one that gets eaten in the week after Diwali, when everyone else's sweets are still on the counter.
 - **Same tier, same box.** Clients talk to each other. Vary the card, not the hamper.
 - **Write the card.** Two handwritten lines beat a printed paragraph. For a long list, print the company line and hand-sign the name.
 - **Deliver to homes.** Half of most teams are remote. A box on the doorstep on Dhanteras is worth more than one collected from reception the following Monday.
@@ -104,10 +104,16 @@ For this year, with Diwali on the 8th, the realistic last day to order for metro
 
 The gifts people talk about are not the unusual ones. They are the ones that fit. The gym owner gets energy bars. The new parent gets cookies their children can eat. The aunt who fasts through Kartik gets a box built for it. The client who cooks gets the oil and the spice. Keep the hamper format and change the contents to the person; that is all "unique" has ever meant.
 
-## A note from the kitchen
+## How to check any hamper before you order it
 
-We bake millet snacks in Jaipur with no added sugar and no palm oil, so we have an interest here. But we only built a Diwali box because customers asked for one after re-gifting three sweet boxes in a single week. Ours pairs energy bars, millet cookies and bites with decorative diyas and a greeting card, ships anywhere in India, and goes out to teams through our [bulk order page](https://www.vrateez.in/bulk-order) with a branded card and delivery to each employee's home.
+Whoever you buy from, five questions separate a good box from an expensive disappointment.
 
-If you would rather build your own, every idea above works with a good local supplier. Just decide this week. The lights are the point of Diwali. The sugar crash never was.
+1. **What is the first ingredient on each food item?** If it is refined flour, sugar or palm oil, keep looking.
+2. **What is the best-before date?** Festive stock is often made months early. Ask for a production date within the last four weeks.
+3. **Can they ship to individual homes, and what does that cost?** Many suppliers quote for one office drop and surprise you later.
+4. **Can you see one real box before you commit?** Photos flatter. A sample tells you about packaging, portion size and taste.
+5. **What happens if a box arrives damaged?** A supplier with a clear answer will also pack the box properly.
+
+Decide this week, order by Tuesday, and write the cards yourself. The lights are the point of Diwali. The sugar crash never was.
 
 *Festival dates follow Drik Panchang based calendars. Puja timings differ by city; confirm locally.*
