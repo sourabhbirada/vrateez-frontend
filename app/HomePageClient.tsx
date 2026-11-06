@@ -5,6 +5,7 @@ import UspStrip from '@/component/home/UspStrip';
 import WhyVrateezSection from '@/component/home/WhyVrateezSection';
 import DealOfferSection from '@/component/home/DealOfferSection';
 import BestsellersSection from '@/component/home/BestsellersSection';
+import ReelsSection from '@/component/home/ReelsSection';
 import BundlesSection from '@/component/home/BundlesSection';
 import BenefitsSection from '@/component/home/BenefitsSection';
 import CompareSection from '@/component/home/CompareSection';
@@ -41,6 +42,9 @@ export default function HomePage() {
       </div>
       <div className="defer-render">
         <BestsellersSection />
+      </div>
+      <div className="defer-render">
+        <ReelsSection />
       </div>
       <div className="defer-render">
         <BundlesSection />
