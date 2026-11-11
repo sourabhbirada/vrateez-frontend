@@ -93,7 +93,7 @@ export default function WelcomeOffer() {
         </button>
 
         <div className="relative h-40">
-          <Image src="/diwali-hero.jpg" alt="Vrateez festive snack hamper" fill className="object-cover" sizes="448px" />
+          <Image src="/virteez/Assorted cookie box.jpeg" alt="Vrateez millet cookie gift boxes" fill className="object-cover" sizes="448px" />
           <div className="absolute inset-0 bg-linear-to-t from-parchment via-parchment/20 to-transparent" />
         </div>
 

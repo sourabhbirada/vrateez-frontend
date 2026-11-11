@@ -29,8 +29,11 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      { source: "/raksha-bandhan", destination: "/diwali", permanent: true },
-      { source: "/product/raksha-bandhan-gift-hamper", destination: "/product/diwali-gift-hamper", permanent: true },
+      // Seasonal pages that are over send visitors to the upcoming fasts and festivals.
+      { source: "/diwali", destination: "/occasions", permanent: false },
+      { source: "/product/diwali-gift-hamper", destination: "/occasions", permanent: false },
+      { source: "/raksha-bandhan", destination: "/occasions", permanent: false },
+      { source: "/product/raksha-bandhan-gift-hamper", destination: "/occasions", permanent: false },
       { source: "/order-tracking", destination: "/track-order", permanent: false },
     ];
   },

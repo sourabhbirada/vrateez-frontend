@@ -143,8 +143,8 @@ export default async function BlogPostPage({ params }: { params: Promise<Params>
               <p className="text-sm text-ink/65 leading-relaxed">
                 Written by the team at Vrateez, a small millet kitchen in Jaipur. We publish what we learn about fasting food, snack labels and gifting, and keep the shop out of the articles.
               </p>
-              <Link href="/diwali" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-clay hover:text-ink transition">
-                <Gift size={14} /> Our Diwali box, if you need one <ArrowRight size={14} />
+              <Link href="/bulk-order" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-clay hover:text-ink transition">
+                <Gift size={14} /> Gifting for a team? Bulk orders <ArrowRight size={14} />
               </Link>
             </div>
 

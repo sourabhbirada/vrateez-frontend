@@ -242,8 +242,8 @@ export default function ShopClient({ initialCategory: initialCategoryParam, init
                             >
                                 Show everything
                             </button>
-                            <Link href="/diwali" className="rounded-full ring-1 ring-ink/15 px-6 py-3 text-sm font-semibold text-ink hover:bg-ink/5 transition">
-                                See the Diwali hamper
+                            <Link href="/occasions" className="rounded-full ring-1 ring-ink/15 px-6 py-3 text-sm font-semibold text-ink hover:bg-ink/5 transition">
+                                See upcoming fasts and festivals
                             </Link>
                         </div>
                     </div>

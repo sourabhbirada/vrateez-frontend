@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import HomePageClient from './HomePageClient';
+import { upcomingOccasions } from '@/lib/occasions';
 import { DEFAULT_FAQS, faqPageSchema } from '@/lib/seoFaqs';
 import { DEFAULT_OG_IMAGE, SITE_URL } from '@/lib/site';
 
@@ -39,7 +40,7 @@ export default function Home() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageSchema(DEFAULT_FAQS)) }} />
-      <HomePageClient />
+      <HomePageClient occasions={upcomingOccasions()} />
     </>
   );
 }

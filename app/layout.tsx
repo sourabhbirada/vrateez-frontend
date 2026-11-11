@@ -15,6 +15,7 @@ import { AuthProvider } from '../context/AuthContext';
 import { SettingsProvider } from '../context/SettingsContext';
 import { CatalogProvider } from '../context/CatalogContext';
 import { getStorefrontData } from '@/lib/server/catalog';
+import { cardProduct, isRetiredCampaign, publicSettings } from '@/lib/catalog';
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -286,14 +287,22 @@ export default async function RootLayout({
         className={`${fraunces.variable} ${inter.variable} ${plexMono.variable} font-sans antialiased`}
       >
         <AuthProvider>
-          <SettingsProvider initialSettings={storefront.settings}>
+          {/* Only what the browser needs: public settings and card-level product fields. */}
+          <SettingsProvider initialSettings={publicSettings(storefront.settings)}>
             <CatalogProvider
               initial={{
-                products: storefront.products,
+                products: storefront.products ? storefront.products.map(cardProduct) : null,
                 categories: storefront.categories,
-                banners: storefront.banners,
-                homeDeals: storefront.homeDeals,
-                landingDeals: storefront.landingDeals,
+                // Retired campaigns (Diwali) never reach the browser.
+                banners: storefront.banners
+                  ? storefront.banners.filter((b) => !isRetiredCampaign(b.title, b.tag, b.subtitle, b.ctaLink, b.image))
+                  : null,
+                homeDeals: storefront.homeDeals
+                  ? storefront.homeDeals.filter((d) => !isRetiredCampaign(d.title, d.subtitle, d.ctaLink, d.productSlug, d.image))
+                  : null,
+                landingDeals: storefront.landingDeals
+                  ? storefront.landingDeals.filter((d) => !isRetiredCampaign(d.title, d.subtitle, d.ctaLink, d.productSlug, d.image))
+                  : null,
               }}
             >
               <CartProvider>
