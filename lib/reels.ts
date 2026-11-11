@@ -30,22 +30,8 @@ export const REELS: Reel[] = [
     duration: 28.5,
     cta: { label: 'Read our story', href: '/about-us' },
   },
-  {
-    slug: 'diwali-reel-trending-30s',
-    title: 'Still gifting sweets nobody eats?',
-    caption: 'Swap the mithai box for a Diwali hamper of millet cookies and energy bars, now ₹379.',
-    tag: 'Diwali',
-    duration: 30,
-    cta: { label: 'Shop the Diwali hamper', href: '/diwali' },
-  },
-  {
-    slug: 'diwali-reel-30s',
-    title: 'This Diwali, skip the sweets',
-    caption: 'Energy bars, millet cookies, diyas and a greeting card in one box. Zero added sugar, no palm oil.',
-    tag: 'Diwali offer',
-    duration: 30,
-    cta: { label: 'Shop the Diwali hamper', href: '/diwali' },
-  },
+  // The two Diwali reels (diwali-reel-trending-30s, diwali-reel-30s) were retired after Diwali 2026.
+  // Their files stay in public/reels for next year.
 ];
 
 export const reelVideo = (slug: string) => `/reels/${slug}.mp4`;

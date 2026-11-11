@@ -1,10 +1,15 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useCategories, useProducts } from '@/context/CatalogContext';
 import type { Product } from '@/lib/api/types';
 import ProductCard from '@/component/product/ProductCard';
+
+/** Cards shown on the homepage before the View all link. */
+const HOME_GRID_LIMIT = 8;
 
 type ProductView = {
   id: string;
@@ -105,10 +110,22 @@ export default function ProductsSection() {
           ))}
         </div>
 
+        {/* At most two rows on the homepage: the full range lives on /shop. Rendering the whole
+            catalogue here was a quarter of the homepage's elements and slowed the first paint on phones. */}
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-          {filtered.map((product) => (
+          {filtered.slice(0, HOME_GRID_LIMIT).map((product) => (
             <ProductCard key={product.id} product={product} onAdd={handleAddToCart} />
           ))}
+        </div>
+
+        <div className="mt-10 flex justify-center">
+          <Link
+            href={activeCategory === 'all' ? '/shop' : `/shop?category=${encodeURIComponent(activeCategory)}`}
+            className="pressable inline-flex items-center gap-2 rounded-full bg-ink px-7 py-3.5 text-sm font-semibold text-parchment transition hover:bg-basil"
+          >
+            View all {filtered.length} product{filtered.length === 1 ? '' : 's'}
+            <ArrowRight size={15} />
+          </Link>
         </div>
       </div>
     </section>

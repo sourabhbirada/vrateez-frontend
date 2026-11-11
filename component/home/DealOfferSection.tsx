@@ -8,28 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { useCatalog, useProducts } from '@/context/CatalogContext';
 import type { Deal, Product } from '@/lib/api/types';
 import { resolveImage } from '@/lib/images';
-
-const FALLBACK_DEAL: Deal = {
-    _id: 'fallback-diwali',
-    title: 'Diwali Gift Hamper',
-    subtitle: 'Celebrate the festival of lights with a healthy gift!',
-    description:
-        'To health and happiness, Vrateez brings you the warmth of Diwali wrapped in delicious treats. Each hamper includes energy bars, cookies, millet bites, decorative diyas & a festive greeting card.',
-    badge: 'LIMITED TIME OFFER',
-    cta: 'Order Now',
-    ctaLink: '/diwali',
-    image: '/diwali-hamper.png',
-    video: '',
-    price: 379,
-    originalPrice: 499,
-    items: ['Energy Bar', 'Coconut Cookies', 'Dry Fruit Cookies', 'Millet Bites', 'Decorative Diyas', 'Festive Greeting Card'],
-    productSlug: 'diwali-gift-hamper',
-    placement: 'homepage',
-    bgFrom: '#FFF5E6',
-    bgTo: '#FFE8CC',
-    isActive: true,
-    position: 1,
-};
+import { isRetiredCampaign } from '@/lib/catalog';
 
 const TRUST = [
     { icon: Package, label: 'Premium gift box' },
@@ -55,7 +34,7 @@ function DealCard({ deal }: { deal: Deal }) {
     const product: Product | null = (slug && products.find((p) => p.slug === slug)) || null;
     const [adding, setAdding] = useState(false);
 
-    const detailsHref = deal.ctaLink && deal.ctaLink.startsWith('/') && !deal.ctaLink.startsWith('/product/') ? deal.ctaLink : '/diwali';
+    const detailsHref = deal.ctaLink && deal.ctaLink.startsWith('/') && !deal.ctaLink.startsWith('/product/') ? deal.ctaLink : '/occasions';
     const productHref = slug ? `/product/${slug}` : detailsHref;
     const price = product?.price ?? deal.price;
     const originalPrice = product?.originalPrice ?? deal.originalPrice;
@@ -167,9 +146,16 @@ function DealCard({ deal }: { deal: Deal }) {
     );
 }
 
+/**
+ * Homepage deals from the CMS. Deals for retired campaigns (Diwali) are skipped, and the section
+ * renders nothing when none are left; the upcoming occasions section takes its place.
+ */
 export default function DealOfferSection() {
     const { homeDeals } = useCatalog();
-    const deals = homeDeals && homeDeals.length ? homeDeals : [FALLBACK_DEAL];
+    const deals = (homeDeals || []).filter(
+        (d) => d.isActive !== false && !isRetiredCampaign(d.title, d.subtitle, d.ctaLink, d.productSlug, d.image),
+    );
+    if (!deals.length) return null;
 
     return (
         <>

@@ -2,6 +2,7 @@ import { getProductCategoryLabel } from '@/lib/api/types';
 import { getAllPosts } from '@/lib/blog';
 import { DEFAULT_FAQS } from '@/lib/seoFaqs';
 import { fetchProducts, fetchSettings } from '@/lib/server/catalog';
+import { upcomingOccasions } from '@/lib/occasions';
 import { SITE_URL } from '@/lib/site';
 
 export const revalidate = 3600;
@@ -37,6 +38,7 @@ export async function GET() {
     .join('\n\n');
 
   const posts = getAllPosts();
+  const occasions = upcomingOccasions();
 
   const body = `# Vrateez
 
@@ -61,6 +63,7 @@ ${productLines || `- [All products](${SITE_URL}/shop)`}
 - [FAQ](${SITE_URL}/faq)
 - [About Vrateez](${SITE_URL}/about-us): founders and philosophy
 - [Contact](${SITE_URL}/contact)
+- [Upcoming fasts and festivals](${SITE_URL}/occasions)
 
 ## Policies
 
@@ -77,7 +80,15 @@ ${posts.map((p) => `- [${p.title}](${SITE_URL}/blog/${p.slug}): ${p.description}
 `
     : ''
 }
-## Common questions
+${
+  occasions.length
+    ? `## Coming up (India dates, Drik Panchang)
+
+${occasions.map((o) => `- ${o.name} (${o.dateLabel}): ${o.blurb}`).join('\n')}
+
+`
+    : ''
+}## Common questions
 
 ${DEFAULT_FAQS.map((f) => `- ${f.question} ${f.answer}`).join('\n')}
 `;

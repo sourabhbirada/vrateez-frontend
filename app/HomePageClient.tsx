@@ -16,21 +16,23 @@ import FaqSection from '@/component/home/FaqSection';
 import AvailableAtSection from '@/component/home/AvailableAtSection';
 import FinalCtaSection from '@/component/home/FinalCtaSection';
 import WelcomeOffer from '@/component/common/WelcomeOffer';
+import UpcomingOccasionsSection from '@/component/home/UpcomingOccasionsSection';
 import { useSettings } from '@/context/SettingsContext';
+import type { Occasion } from '@/lib/occasions';
 
 /**
  * Home page, ordered as a sales funnel:
  * hook (hero) → trust (USP strip) → offer (deal) → easy first purchase (bestsellers, boxes)
  * → why us (benefits, comparison) → full range → proof (reviews) → objections (FAQ) → close.
  */
-export default function HomePage() {
+export default function HomePage({ occasions = [] }: { occasions?: Occasion[] }) {
   const { settings } = useSettings();
   const sections = settings?.appearance?.homepageSections;
 
   return (
     <main>
       <h1 className="sr-only">Vrateez: vrat-friendly millet protein cookies, energy bars and fasting snacks</h1>
-      {(sections?.heroCarousel ?? true) && <HeroSection />}
+      {(sections?.heroCarousel ?? true) && <HeroSection occasion={occasions[0] ?? null} />}
       <WhyVrateezSection />
       {/* Below-the-fold sections skip layout and paint until they near the viewport.
           Their content stays in the HTML for search engines and screen readers. */}
@@ -39,6 +41,9 @@ export default function HomePage() {
       </div>
       <div className="defer-render">
         <DealOfferSection />
+      </div>
+      <div className="defer-render">
+        <UpcomingOccasionsSection occasions={occasions} />
       </div>
       <div className="defer-render">
         <BestsellersSection />

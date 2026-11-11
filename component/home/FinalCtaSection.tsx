@@ -32,10 +32,10 @@ export default function FinalCtaSection() {
             <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
           </Link>
           <Link
-            href="/diwali"
+            href="/occasions"
             className="inline-flex items-center gap-2 rounded-full bg-parchment/10 ring-1 ring-parchment/20 px-6 py-3.5 text-sm font-semibold text-parchment hover:bg-parchment/20 transition"
           >
-            <Gift size={15} className="text-millet" /> Diwali hamper
+            <Gift size={15} className="text-millet" /> Fasts &amp; festivals
           </Link>
           <a
             href={waHref}

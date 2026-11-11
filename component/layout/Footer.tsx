@@ -31,7 +31,7 @@ const COMPANY_LINKS = [
   { href: '/bulk-order', label: 'Bulk Orders' },
   { href: '/track-order', label: 'Track Order' },
   { href: '/faq', label: 'FAQ' },
-  { href: '/diwali', label: 'Diwali Offers' },
+  { href: '/occasions', label: 'Fasts & festivals' },
 ];
 
 const WHY_VRATEEZ = [

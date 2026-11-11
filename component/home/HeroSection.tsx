@@ -6,6 +6,8 @@ import { ArrowRight, Leaf, ShieldCheck, Star, WheatOff } from 'lucide-react';
 import { useCatalog, useProducts } from '@/context/CatalogContext';
 import type { Banner } from '@/lib/api/types';
 import { resolveImage } from '@/lib/images';
+import { isRetiredCampaign } from '@/lib/catalog';
+import type { Occasion } from '@/lib/occasions';
 
 type HeroSlide = {
     image: string;
@@ -20,20 +22,6 @@ type HeroSlide = {
 };
 
 const FALLBACK_SLIDES: HeroSlide[] = [
-    {
-        image: '/diwali-hero.jpg',
-        imagePosition: 'object-cover object-center',
-        tag: 'Diwali Special · Limited Time',
-        title: 'Gift hamper that\nlights up Diwali.',
-        subtitle: 'Healthy treats, decorative diyas and a festive greeting card, all wrapped in warmth.',
-        cta: 'Order hamper now',
-        href: '/diwali',
-        macros: [
-            { value: '₹379', label: 'Special Price' },
-            { value: '₹120', label: 'You Save' },
-            { value: '6', label: 'Items' },
-        ],
-    },
     {
         image: '/virteez/All three infused cookies.jpeg',
         imagePosition: 'object-[70%_38%]',
@@ -110,14 +98,44 @@ function mapBannerToSlide(banner: Banner): HeroSlide {
     };
 }
 
-function slidesFromBanners(banners: Banner[] | null | undefined): HeroSlide[] {
-    const mapped = (banners || []).map(mapBannerToSlide).filter((s) => s.title && (s.image || s.video));
-    return mapped.length > 0 ? mapped : FALLBACK_SLIDES;
+/** Hero slide for the next fast or festival (lib/occasions.ts), shown first. */
+function slideFromOccasion(o: Occasion): HeroSlide {
+    return {
+        image: o.image,
+        imagePosition: 'object-cover object-center',
+        tag: `${o.name} · ${o.dateLabel}`,
+        title: o.heroTitle,
+        subtitle: o.heroSubtitle,
+        cta: o.cta.label,
+        href: o.cta.href,
+        macros:
+            o.kind === 'fast'
+                ? [
+                      { value: '0g', label: 'Added sugar' },
+                      { value: 'No', label: 'Onion or garlic' },
+                      { value: 'Free', label: 'Delivery above ₹499' },
+                  ]
+                : [
+                      { value: 'Custom', label: 'Packaging' },
+                      { value: 'Pan-India', label: 'Delivery' },
+                      { value: 'Zero', label: 'Added sugar' },
+                  ],
+    };
+}
+
+/** CMS banners minus retired campaigns (Diwali), with the next occasion's slide in front. */
+function slidesFromBanners(banners: Banner[] | null | undefined, occasion?: Occasion | null): HeroSlide[] {
+    const mapped = (banners || [])
+        .filter((b) => !isRetiredCampaign(b.title, b.tag, b.subtitle, b.ctaLink, b.image))
+        .map(mapBannerToSlide)
+        .filter((s) => s.title && (s.image || s.video));
+    const base = mapped.length > 0 ? mapped : FALLBACK_SLIDES;
+    return occasion ? [slideFromOccasion(occasion), ...base] : base;
 }
 
 /**
  * Two-line titles get the highlighter stroke from the design on the second line,
- * except its last word: "Gift hamper that / [lights up] Diwali."
+ * except its last word: "Sattvic snacks / [for Chhath] Puja."
  */
 function TitleWithHighlight({ title }: { title: string }) {
     const lines = title
@@ -168,12 +186,12 @@ function MacroCard({ macros }: { macros: HeroSlide['macros'] }) {
     );
 }
 
-export default function HeroSection() {
+export default function HeroSection({ occasion }: { occasion?: Occasion | null }) {
     // Banners come from the server-rendered catalogue, so the first slide is in the HTML
     // and the hero never swaps from a placeholder to content (no layout shift).
     const { banners } = useCatalog();
     const { products } = useProducts();
-    const slides = useMemo(() => slidesFromBanners(banners), [banners]);
+    const slides = useMemo(() => slidesFromBanners(banners, occasion), [banners, occasion]);
     const [current, setCurrent] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
 
@@ -317,9 +335,10 @@ export default function HeroSection() {
                                             alt={i === current ? s.title.replace(/\s+/g, ' ') : ''}
                                             fill
                                             className={`object-cover ${s.imagePosition}`}
-                                            priority={i === 0}
-                                            fetchPriority={i === 0 ? 'high' : 'low'}
-                                            loading={i === 0 ? undefined : 'eager'}
+                                            // No preload: on phones the photo sits below the headline (the LCP element),
+                                            // and a high-priority image download competed with the fonts and CSS it needs.
+                                            fetchPriority={i === 0 ? 'auto' : 'low'}
+                                            loading="eager"
                                             sizes="(min-width: 1024px) 540px, 92vw"
                                         />
                                     ) : null}

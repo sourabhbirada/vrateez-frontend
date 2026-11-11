@@ -239,7 +239,7 @@ export default function ReelsSection() {
           <p className="mb-3 font-label text-[10px] uppercase tracking-[0.24em] text-millet">Vrateez Reels</p>
           <h2 className="font-display text-4xl italic leading-none text-parchment md:text-5xl">Watch, snack, repeat.</h2>
           <p className="mt-4 text-sm leading-relaxed text-parchment/60">
-            A look inside our kitchen in Jaipur, and a better Diwali gift than another box of mithai.
+            A look inside our kitchen in Jaipur, where every batch is baked small and packed fresh to order.
           </p>
         </div>
       </div>
@@ -301,7 +301,8 @@ export default function ReelsSection() {
                       muted={muted}
                       playsInline
                       disablePictureInPicture
-                      onEnded={isCenter ? next : undefined}
+                      loop={N === 1}
+                      onEnded={isCenter && N > 1 ? next : undefined}
                       aria-label={reel.title}
                       // Side cards keep their video loaded but show the poster: a rewound video
                       // would show its first frame, which is often a blank background.
@@ -390,6 +391,7 @@ export default function ReelsSection() {
         </div>
 
         {/* Arrows beside the cards (tablet and up) */}
+        {N > 1 && (<>
         <button
           type="button"
           onClick={prev}
@@ -408,9 +410,11 @@ export default function ReelsSection() {
         >
           <ChevronRight size={22} />
         </button>
+        </>)}
       </div>
 
       {/* Dots: the current one fills as its reel plays. Phones also get arrows here. */}
+      {N > 1 && (
       <div className="relative mt-8 flex items-center justify-center gap-1.5 px-6">
         <button
           type="button"
@@ -453,6 +457,7 @@ export default function ReelsSection() {
           <ChevronRight size={20} />
         </button>
       </div>
+      )}
     </section>
   );
 }
